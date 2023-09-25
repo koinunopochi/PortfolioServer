@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+const {logger} = require('./lib/logger');
+
 const cors = require('cors');
 
 const bodyParser = require('body-parser');
@@ -8,13 +10,14 @@ const bodyParser = require('body-parser');
 
 const { router: authRouter } = require('./router/auth');
 const MyCustomError = require('./lib/custom_error');
+const mongo = require('./lib/mongo');
 
 
 app.use(cors());
 app.use(bodyParser.json());
 
 
-const port = process.env.PORT || 3000;
+const server_port = process.env.PORT || 3000;
 
 app.use('/auth', authRouter);
 
@@ -31,6 +34,18 @@ app.use((err, req, res, next)=>{
   }
 })
 
-app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`);
-});
+
+mongo
+  .connect()
+  .then(async () => {
+    //初期化用のコード
+    await mongo.init();
+  })
+  .then(() => {
+    app.listen(server_port, () => {
+      logger.info(`Server is listening on port ${server_port}`);
+    });
+  })
+  .catch((err) => {
+    logger.error(err);
+  });
