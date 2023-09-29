@@ -1,30 +1,84 @@
 const express = require('express');
 const { MyCustomError } = require('../lib/custom_error');
+const { ValidationPassword, ValidationParams } = require('../lib/validate');
 const {
-  ValidationEmail,
-  ValidationPassword,
-  ValidationParams,
-} = require('../lib/validate');
-const { getUserInfo, insertRefreshToken, getRefreshToken, deleteRefreshToken } = require('../controller/user');
+  getUserInfo,
+  insertRefreshToken,
+  getRefreshToken,
+  deleteRefreshToken,
+  insertUser,
+  deleteUser,
+} = require('../controller/user');
 const router = express.Router();
 
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
+router.post('/signup', async (req, res, next) => {
+  try {
+    logger.info('called /signup');
+    const { username, password } = req.body;
+    // パラメータのチェック
+    ValidationParams(req.body, ['username', 'password']);
+    // ValidationEmail(email);
+    if (username == '') {
+      throw new MyCustomError('InvalidUsername', 'invalid username', 400);
+    }
+    ValidationPassword(password);
+    // logger.debug(email);
+    // userの存在確認
+    const user = await getUserInfo({ username });
+    if (!user) {
+      logger.debug(user);
+      logger.debug('user is not exist');
+    } else {
+      if (user.is_verify == true) {
+        throw new MyCustomError('ExistUserError', 'email already exists', 400);
+      } else {
+        // すでに未認証のユーザーが存在する場合は削除
+        await deleteUser({ username });
+      }
+    }
+
+    // ユーザー情報をDBに保存
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = crypto.randomBytes(16).toString('hex'); // トークンの生成
+    const result = await insertUser(
+      username,
+      hashedPassword,
+      verificationToken,
+      true,
+      'user'
+    );
+
+    // const url = `http://localhost:3000/auth/verify?token=${verificationToken}`;
+    // // メールの送信
+    // await SendMail(email, url);
+    // response
+    logger.info('finish /signup');
+    res.status(200).json({ message: 'success' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// login API
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    ValidationParams(req.body, ['email', 'password']);
-    ValidationEmail(email);
+    const { username, password } = req.body;
+    ValidationParams(req.body, ['username', 'password']);
+    // ValidationEmail(email);
+    if (username == '') {
+      throw new MyCustomError('InvalidUsername', 'invalid username', 400);
+    }
     ValidationPassword(password);
 
-    console.log(email, password);
-
-    const user = await getUserInfo({ email });
+    const user = await getUserInfo({ username });
 
     console.log(user);
 
@@ -40,40 +94,84 @@ router.post('/login', async (req, res, next) => {
     }
 
     // リフレッシュトークンがあるか確認
-    const is_refresh_token = await getRefreshToken(email);
-    logger.debug(is_refresh_token);
+    const is_refresh_token = await getRefreshToken(username);
+    logger.debug("is_refresh_token:"+is_refresh_token.refresh_token);
     // リフレッシュトークンがある場合は削除
     if (is_refresh_token) {
-      await deleteRefreshToken(email);
+      await deleteRefreshToken(username);
     }
 
     // JWTを発行
-    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ email }, REFRESH_SECRET_KEY, {
+    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
       expiresIn: '7d',
     });
     // リフレッシュトークンをDBに保存
-    await insertRefreshToken(email, refreshToken);
+    await insertRefreshToken(username, refreshToken);
 
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
-      sameSite: 'lax',
-      path: '/',
-      domain: 'localhost',
+      // sameSite: 'None',
     });
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: false,
-      sameSite: 'lax',
-      path: '/',
-      domain: 'localhost',
+      // sameSite: 'None',
     });
 
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
+  }
+});
+
+/**
+ * @route POST /refresh
+ * @group Authentication - 認証関連のエンドポイント
+ * @param {express.Request} req - Expressリクエストオブジェクト
+ * @param {express.Response} res - Expressレスポンスオブジェクト
+ * @param {express.NextFunction} next - Expressのnext関数
+ * @returns {Object} 200 - 新しい認証トークンが生成され、クッキーに保存された
+ * @returns {Error}  default - 予期しないエラー
+ * @security JWT
+ *
+ * @description
+ * このエンドポイントは、有効なリフレッシュトークンがクッキーに存在する場合、新しい認証トークンを生成します。
+ * リフレッシュトークンはJWTを検証し、その情報を基に新しい認証トークンを生成します。
+ * 新しい認証トークンはクッキーに保存され、クライアントに成功のレスポンスが返されます。
+ * エラーが発生した場合、エラーハンドラがエラーを処理します。
+ */
+router.post('/refresh', async (req, res, next) => {
+  try {
+    // このルートの保護はしない
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+      logger.debug("refresh_token:"+refreshToken);
+      throw new MyCustomError('InvalidRefreshToken', 'invalid refresh token',401);
+    }
+    logger.debug(refreshToken);
+    logger.info('called /refresh');
+    // パラメータのチェック
+    ValidationParams(req.body, []);
+    // リフレッシュトークンの検証
+    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
+    logger.debug(decoded);
+    // usernameを取得
+    const username = decoded.username; // 変更した部分
+    // usernameからtokenの作成
+    const token = jwt.sign({ username }, SECRET_KEY, {
+      // 変更した部分
+      expiresIn: '15m',
+    });
+    // クッキーにトークンを保存
+    res.cookie('authToken', token, { httpOnly: true });
+    res.status(200).json({ message: 'success' });
+  } catch (error) {
+    logger.error(error);
+    next(error);
   }
 });
 

@@ -26,11 +26,11 @@ const { logger } = require('../lib/logger');
  * }
  */
 
-const insertUser = async (email, password, token, is_verify, role) => {
+const insertUser = async (username, password, token, is_verify, role) => {
   const db = getDb();
   const collection = db.collection('users');
   const result = await collection
-    .insertOne({ email, password, token, is_verify, role })
+    .insertOne({ username, password, token, is_verify, role })
     .catch((err) => {
       throw err;
     });
@@ -38,29 +38,29 @@ const insertUser = async (email, password, token, is_verify, role) => {
 };
 exports.insertUser = insertUser;
 
-const getRefreshToken = async (email) => {
+const getRefreshToken = async (username) => {
   const db = getDb();
   const collection = db.collection('refresh_tokens');
   const result = await collection.findOne(
-    { email },
+    { username },
     { projection: { _id: 0, refresh_token: 1 } }
   );
   return result;
 };
 exports.getRefreshToken = getRefreshToken;
 
-const insertRefreshToken = async (email, refresh_token) => {
+const insertRefreshToken = async (username, refresh_token) => {
   const db = getDb();
   const collection = db.collection('refresh_tokens');
-  const result = await collection.insertOne({ email, refresh_token });
+  const result = await collection.insertOne({ username, refresh_token });
   return result;
 };
 exports.insertRefreshToken = insertRefreshToken;
 
-const deleteRefreshToken = async (email) => {
+const deleteRefreshToken = async (username) => {
   const db = getDb();
   const collection = db.collection('refresh_tokens');
-  const result = await collection.deleteOne({ email });
+  const result = await collection.deleteOne({ username });
   return result;
 };
 exports.deleteRefreshToken = deleteRefreshToken;
@@ -102,11 +102,11 @@ exports.deleteUser = deleteUser;
  * この関数は、与えられたJSONクエリパラメータを使用してデータベースからユーザー情報を取得します。
  * ユーザー情報が見つからない場合は、カスタムエラーをスローします。
  */
-const getUserInfo = async (json) => {
+const getUserInfo = async (username) => {
   const db = getDb();
   const collection = db.collection('users');
-  logger.debug('getUserInfo:' + json);
-  const user = await collection.findOne(json);
+  logger.debug('getUserInfo:' + username);
+  const user = await collection.findOne(username);
   // logger.debug(user);
   // if (user === null) {
   //   throw new MyCustomError('NotFoundEmailError', 'email not found', 400);
