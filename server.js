@@ -6,22 +6,38 @@ const { logger } = require('./lib/logger');
 const cors = require('cors');
 
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const { router: authRouter } = require('./router/auth');
 const { MyCustomError } = require('./lib/custom_error');
 const mongo = require('./lib/mongo');
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173', // クライアントのオリジン
+  credentials: true, // クレデンシャル（Cookie）を許可
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const server_port = process.env.PORT || 3000;
 
+app.use((req, res, next) => {
+  logger.info(req.method + ' ' + req.url);
+  next();
+});
 app.use('/auth', authRouter);
 
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
 });
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 /**
  * @route USE /* - すべてのルート
