@@ -17,10 +17,34 @@ const getBlogs = async () => {
   return db.collection('blogs').find().toArray();
 };
 
+const getBloOverviews = async () => {
+  const db = getDb();
+  const overviews = await db
+    .collection('blogs')
+    .find(
+      {},
+      {
+        projection: {
+          _id: 1, // 明示的に_idを含める。
+          title: 1,
+          overview: 1,
+        },
+      }
+    )
+    .toArray();
+  return overviews;
+};
+
+
+const getBlog = async (id) => {
+  const db = getDb();
+  return db.collection('blogs').findOne({ _id: new ObjectId(id) });
+}
+
 const deleteBlog = async (id) => {
   const db = getDb();
   const result = await db.collection('blogs').deleteOne({ _id: new ObjectId(id) });
   return result.deletedCount === 1;
 };
 
-module.exports = { insertBlog, getBlogs, deleteBlog };
+module.exports = { insertBlog, getBlogs, deleteBlog, getBlog , getBloOverviews};
