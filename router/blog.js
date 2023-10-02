@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { insertBlog, getBlogs, deleteBlog } = require('../controller/blog'); // 更新
+const { logger } = require('../lib/logger');
 
 router.get('/', async (req, res) => {
   try {
@@ -11,16 +12,23 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   try {
+    const { title, content, overview } = req.body;
     const savedBlog = await insertBlog({
-      title: req.body.title,
-      content: req.body.content,
+      title: title,
+      overview: overview,
+      content: content,
     });
-    console.log(savedBlog);
-    res.json(savedBlog);
+    logger.debug(savedBlog);
+    logger.info('id:' + savedBlog.insertedId);
+    res.json({
+      message: 'Blog created',
+      blog: { title, content },
+      id: savedBlog.insertedId,
+    });
   } catch (err) {
-    res.json({ message: err });
+    next(err);
   }
 });
 
