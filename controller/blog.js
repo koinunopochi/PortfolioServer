@@ -20,7 +20,7 @@ const getBlogs = async () => {
 const deleteBlog = async (id) => {
   const db = getDb();
   const result = await db.collection('blogs').deleteOne({ _id: ObjectId(id) });
-  return result.deletedCount === 1;
+  return result;
 };
 
 module.exports = { insertBlog, getBlogs, deleteBlog };
