@@ -95,7 +95,7 @@ router.post('/login', async (req, res, next) => {
 
     // リフレッシュトークンがあるか確認
     const is_refresh_token = await getRefreshToken(username);
-    logger.debug("is_refresh_token:"+is_refresh_token.refresh_token);
+    // logger.debug("is_refresh_token:"+is_refresh_token.refresh_token);
     // リフレッシュトークンがある場合は削除
     if (is_refresh_token) {
       await deleteRefreshToken(username);
