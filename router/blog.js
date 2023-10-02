@@ -9,7 +9,9 @@ const {
 } = require('../controller/blog');
 const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../lib/custom_error');
+const { admin_route } = require('../lib/admin_route');
 
+router.use(admin_route);
 // とりあえずは、問題がない
 router.get('/overviews', async (req, res, next) => {
   try {
