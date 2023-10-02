@@ -1,9 +1,47 @@
 const express = require('express');
 const router = express.Router();
-const { insertBlog, getBlogs, deleteBlog } = require('../controller/blog'); // 更新
+const {
+  insertBlog,
+  getBlogs,
+  deleteBlog,
+  getBlog,
+  getBloOverviews,
+} = require('../controller/blog');
 const { logger } = require('../lib/logger');
+const { MyCustomError } = require('../lib/custom_error');
+
+router.get('/overviews', async (req, res, next) => {
+  try {
+    const overviews = await getBloOverviews();
+    res.json(overviews);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // とりあえずは、問題がない
+// idのブログの情報をとる
+router.get('/:blogId', async (req, res, next) => {
+  try {
+    const blog = await getBlog(req.params.blogId); // 更新
+    if (blog) {
+      res.json(blog);
+    } else {
+      throw new MyCustomError('BlogNotFound', 'blog not found', 404);
+    }
+  } catch (err) {
+    if ((err.name = 'BSONError')) {
+      next(new MyCustomError('InvalidBlogId', 'invalid blog id', 400));
+    } else {
+      next(err);
+    }
+  }
+});
+
+
+
+// とりあえずは、問題がない
+// 全部のブログの情報をとるが、あまりよくない
 router.get('/', async (req, res, next) => {
   try {
     const blogs = await getBlogs(); // 更新
@@ -34,6 +72,7 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+// とりあえずは、問題がない
 router.delete('/:blogId', async (req, res, next) => {
   try {
     const isDeleted = await deleteBlog(req.params.blogId); // 更新
