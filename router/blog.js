@@ -10,6 +10,7 @@ const {
 const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../lib/custom_error');
 
+// とりあえずは、問題がない
 router.get('/overviews', async (req, res, next) => {
   try {
     const overviews = await getBloOverviews();
@@ -23,7 +24,7 @@ router.get('/overviews', async (req, res, next) => {
 // idのブログの情報をとる
 router.get('/:blogId', async (req, res, next) => {
   try {
-    const blog = await getBlog(req.params.blogId); // 更新
+    const blog = await getBlog(req.params.blogId);
     if (blog) {
       res.json(blog);
     } else {
