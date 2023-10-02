@@ -3,15 +3,17 @@ const router = express.Router();
 const { insertBlog, getBlogs, deleteBlog } = require('../controller/blog'); // 更新
 const { logger } = require('../lib/logger');
 
-router.get('/', async (req, res) => {
+// とりあえずは、問題がない
+router.get('/', async (req, res, next) => {
   try {
     const blogs = await getBlogs(); // 更新
     res.json(blogs);
   } catch (err) {
-    res.json({ message: err });
+    next(err);
   }
 });
 
+// 最低限追加が可能、バリデーションは自身しか使わないため、不要
 router.post('/', async (req, res, next) => {
   try {
     const { title, content, overview } = req.body;
@@ -32,16 +34,17 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.delete('/:blogId', async (req, res) => {
+router.delete('/:blogId', async (req, res, next) => {
   try {
     const isDeleted = await deleteBlog(req.params.blogId); // 更新
+    console.log(isDeleted);
     if (isDeleted) {
       res.json({ message: 'Blog deleted' });
     } else {
       res.status(404).json({ message: 'Blog not found' });
     }
   } catch (err) {
-    res.json({ message: err });
+    next(err);
   }
 });
 
