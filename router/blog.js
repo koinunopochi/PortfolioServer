@@ -37,8 +37,9 @@ router.post('/', async (req, res, next) => {
 router.delete('/:blogId', async (req, res, next) => {
   try {
     const isDeleted = await deleteBlog(req.params.blogId); // 更新
-    console.log(isDeleted);
+    logger.debug(isDeleted);
     if (isDeleted) {
+      logger.info('deleted blog' + req.params.blogId);
       res.json({ message: 'Blog deleted' });
     } else {
       res.status(404).json({ message: 'Blog not found' });
