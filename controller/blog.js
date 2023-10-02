@@ -6,9 +6,10 @@ const insertBlog = async (data) => {
   const result = await db.collection('blogs').insertOne({
     title: data.title,
     content: data.content,
+    overview: data.overview,
     date: data.date || new Date(),
   });
-  return result.ops[0];
+  return result;
 };
 
 const getBlogs = async () => {
