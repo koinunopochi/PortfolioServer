@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 
 const { router: authRouter } = require('./router/auth');
 const { router: blogRouter } = require('./router/blog');
+const { router: contactRouter } = require('./router/contact');
 const { MyCustomError } = require('./lib/custom_error');
 const mongo = require('./lib/mongo');
 
@@ -29,7 +30,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use('/auth', authRouter);
-app.use("/blog", blogRouter);
+app.use('/blog', blogRouter);
+app.use('/contact', contactRouter);
 
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
