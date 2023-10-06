@@ -12,6 +12,21 @@ const insertBlog = async (data) => {
   return result;
 };
 
+const updateBlog = async (id, data) => {
+  const db = getDb();
+  const result = await db.collection('blogs').updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        title: data.title,
+        content: data.content,
+        overview: data.overview,
+      },
+    }
+  );
+  return result;
+};
+
 const getBlogs = async () => {
   const db = getDb();
   return db.collection('blogs').find().toArray();
@@ -47,4 +62,4 @@ const deleteBlog = async (id) => {
   return result.deletedCount === 1;
 };
 
-module.exports = { insertBlog, getBlogs, deleteBlog, getBlog , getBloOverviews};
+module.exports = { insertBlog, getBlogs, deleteBlog, getBlog , getBloOverviews, updateBlog};
