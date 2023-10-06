@@ -6,13 +6,13 @@ const {
   deleteBlog,
   getBlog,
   getBloOverviews,
+  updateBlog,
 } = require('../controller/blog');
 const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../lib/custom_error');
 const { admin_route } = require('../lib/admin_route');
 
-router.use(admin_route);
-// とりあえずは、問題がない
+// 未認証ルート
 router.get('/overviews', async (req, res, next) => {
   try {
     const overviews = await getBloOverviews();
@@ -22,8 +22,6 @@ router.get('/overviews', async (req, res, next) => {
   }
 });
 
-// とりあえずは、問題がない
-// idのブログの情報をとる
 router.get('/:blogId', async (req, res, next) => {
   try {
     const blog = await getBlog(req.params.blogId);
@@ -41,8 +39,6 @@ router.get('/:blogId', async (req, res, next) => {
   }
 });
 
-
-
 // とりあえずは、問題がない
 // 全部のブログの情報をとるが、あまりよくない
 router.get('/', async (req, res, next) => {
@@ -53,6 +49,9 @@ router.get('/', async (req, res, next) => {
     next(err);
   }
 });
+
+// 認証ルート
+router.use(admin_route);
 
 // 最低限追加が可能、バリデーションは自身しか使わないため、不要
 router.post('/', async (req, res, next) => {
@@ -67,7 +66,27 @@ router.post('/', async (req, res, next) => {
     logger.info('id:' + savedBlog.insertedId);
     res.json({
       message: 'Blog created',
-      blog: { title, content },
+      blog: { title, overview, content },
+      id: savedBlog.insertedId,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+router.put('/:blogId', async (req, res, next) => {
+  try {
+    const { title, content, overview } = req.body;
+    const id = req.params.blogId;
+    const savedBlog = await updateBlog(id,{
+      title: title,
+      overview: overview,
+      content: content,
+    });
+    logger.debug(savedBlog);
+    logger.info('id:' + savedBlog.insertedId);
+    res.json({
+      message: 'Blog created',
+      blog: { title, overview, content },
       id: savedBlog.insertedId,
     });
   } catch (err) {
