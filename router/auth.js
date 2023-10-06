@@ -15,11 +15,12 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
+const { admin_route, isAdmin } = require('../lib/admin_route');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
-router.post('/signup', async (req, res, next) => {
+router.post('/signup', admin_route, async (req, res, next) => {
   try {
     logger.info('called /signup');
     const { username, password } = req.body;
@@ -109,8 +110,6 @@ router.post('/login', async (req, res, next) => {
     // リフレッシュトークンをDBに保存
     await insertRefreshToken(username, refreshToken);
 
-
-
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
@@ -125,6 +124,53 @@ router.post('/login', async (req, res, next) => {
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
+  }
+});
+/**
+ * @route POST /logout
+ * @group Authentication - 認証関連のエンドポイント
+ * @param {express.Request} req - Expressリクエストオブジェクト
+ * @param {express.Response} res - Expressレスポンスオブジェクト
+ * @param {express.NextFunction} next - Expressのnext関数
+ * @returns {Object} 200 - ログアウト成功, クッキーが削除された
+ * @returns {Error} default - 予期しないエラー
+ *
+ * @description
+ * このエンドポイントはユーザーをログアウトし、認証とリフレッシュトークンを無効にします。
+ * まず、リクエストからリフレッシュトークンを取得し、トークンを検証して関連するメールアドレスを取得します。
+ * 次に、データベースからリフレッシュトークンを削除し、クライアントのクッキーから認証とリフレッシュトークンを削除します。
+ * 処理が成功した場合、クライアントに「success」メッセージとともに200のステータスコードを返します。
+ * エラーが発生した場合、エラーは次のミドルウェア関数に渡されます。
+ */
+router.post('/logout', async (req, res, next) => {
+  try {
+    // logger.info('called /logout');
+    const { refreshToken } = req.cookies;
+    // パラメータのチェック
+    ValidationParams(req.body, []);
+    // リフレッシュトークンの存在確認
+    if (!refreshToken) {
+      logger.debug('refresh_token:' + refreshToken);
+      throw new MyCustomError(
+        'InvalidRefreshToken',
+        'invalid refresh token',
+        401
+      );
+    }
+    // リフレッシュトークンの検証
+    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
+    logger.debug(decoded);
+    // emailを取得
+    const username = decoded.username;
+    // リフレッシュトークンを削除
+    await deleteRefreshToken(username);
+    // Cookieを削除
+    res.clearCookie('authToken');
+    res.clearCookie('refreshToken');
+    res.status(200).json({ message: 'success' });
+    logger.info('finish /logout');
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -149,8 +195,12 @@ router.post('/refresh', async (req, res, next) => {
     // このルートの保護はしない
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      logger.debug("refresh_token:"+refreshToken);
-      throw new MyCustomError('InvalidRefreshToken', 'invalid refresh token',401);
+      logger.debug('refresh_token:' + refreshToken);
+      throw new MyCustomError(
+        'InvalidRefreshToken',
+        'invalid refresh token',
+        401
+      );
     }
     logger.debug(refreshToken);
     logger.info('called /refresh');
@@ -171,6 +221,16 @@ router.post('/refresh', async (req, res, next) => {
     res.status(200).json({ message: 'success' });
   } catch (error) {
     logger.error(error);
+    next(error);
+  }
+});
+
+router.get('/is-admin', async (req, res, next) => {
+  try {
+    const is_admin = await isAdmin(req);
+    logger.debug(is_admin);
+    res.json({ is_admin: is_admin });
+  } catch (error) {
     next(error);
   }
 });
