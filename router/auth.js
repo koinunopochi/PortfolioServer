@@ -231,6 +231,9 @@ router.get('/is-admin', async (req, res, next) => {
     logger.debug(is_admin);
     res.json({ is_admin: is_admin });
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      new MyCustomError('TokenExpiredError', 'token expired', 400);
+    }
     next(error);
   }
 });
