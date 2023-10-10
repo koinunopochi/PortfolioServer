@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/mongo');
 const { MyCustomError } = require('../lib/custom_error');
 const { logger } = require('../lib/logger');
+const { getCollection } = require('./db_utils');
 
 /**
  * 新しいユーザーをデータベースに追加します。
@@ -27,8 +28,7 @@ const { logger } = require('../lib/logger');
  */
 
 const insertUser = async (username, password, token, is_verify, role) => {
-  const db = getDb();
-  const collection = db.collection('users');
+  const collection = await getCollection('users');
   const result = await collection
     .insertOne({ username, password, token, is_verify, role })
     .catch((err) => {
@@ -39,8 +39,7 @@ const insertUser = async (username, password, token, is_verify, role) => {
 exports.insertUser = insertUser;
 
 const getRefreshToken = async (username) => {
-  const db = getDb();
-  const collection = db.collection('refresh_tokens');
+const collection = await getCollection('refresh_tokens');
   const result = await collection.findOne(
     { username },
     { projection: { _id: 0, refresh_token: 1 } }
@@ -50,16 +49,14 @@ const getRefreshToken = async (username) => {
 exports.getRefreshToken = getRefreshToken;
 
 const insertRefreshToken = async (username, refresh_token) => {
-  const db = getDb();
-  const collection = db.collection('refresh_tokens');
+const collection = await getCollection('refresh_tokens');
   const result = await collection.insertOne({ username, refresh_token });
   return result;
 };
 exports.insertRefreshToken = insertRefreshToken;
 
 const deleteRefreshToken = async (username) => {
-  const db = getDb();
-  const collection = db.collection('refresh_tokens');
+const collection = await getCollection('refresh_tokens');
   const result = await collection.deleteOne({ username });
   return result;
 };
@@ -82,8 +79,7 @@ exports.deleteRefreshToken = deleteRefreshToken;
  *   .catch(err => console.error(err));
  */
 const deleteUser = async (primary_json) => {
-  const db = getDb();
-  const collection = db.collection('users');
+  const collection = await getCollection('users');
   const result = await collection.deleteOne(primary_json);
   return result;
 };
@@ -103,9 +99,7 @@ exports.deleteUser = deleteUser;
  * ユーザー情報が見つからない場合は、カスタムエラーをスローします。
  */
 const getUserInfo = async (username) => {
-  const db = getDb();
-  const collection = db.collection('users');
-  logger.debug('getUserInfo:' + username);
+  const collection = await getCollection('users');
   const user = await collection.findOne(username);
   // logger.debug(user);
   // if (user === null) {
@@ -128,8 +122,7 @@ exports.getUserInfo = getUserInfo;
  * 2つ目のパラメータ（target_json）を使用してそのユーザーのデータを更新します。更新が成功した場合、結果オブジェクトを返します。
  */
 const updateUser = async (primary_json, target_json) => {
-  const db = getDb();
-  const collection = db.collection('users');
+  const collection = await getCollection('users');
   logger.debug(target_json);
   const result = await collection.updateOne(primary_json, {
     $set: target_json,
@@ -140,8 +133,7 @@ const updateUser = async (primary_json, target_json) => {
 exports.updateUser = updateUser;
 
 const updateAccessNum = async (username) => {
-  const db = getDb();
-  const collection = db.collection('users');
+  const collection = await getCollection('users');
   const result = await collection.updateOne(
     { username },
     { $inc: { access_num: 1 } }
