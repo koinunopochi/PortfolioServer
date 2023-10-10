@@ -138,3 +138,15 @@ const updateUser = async (primary_json, target_json) => {
   return result;
 };
 exports.updateUser = updateUser;
+
+const updateAccessNum = async (username) => {
+  const db = getDb();
+  const collection = db.collection('users');
+  const result = await collection.updateOne(
+    { username },
+    { $inc: { access_num: 1 } }
+  );
+  return result;
+};
+
+exports.updateAccessNum = updateAccessNum;
