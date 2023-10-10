@@ -11,8 +11,11 @@ const cookieParser = require('cookie-parser');
 const { router: authRouter } = require('./router/auth');
 const { router: blogRouter } = require('./router/blog');
 const { router: contactRouter } = require('./router/contact');
+const { router: accessRouter } = require('./router/access');
+
 const { MyCustomError } = require('./lib/custom_error');
 const mongo = require('./lib/mongo');
+const { accessLog } = require('./lib/access_log');
 
 const corsOptions = {
   origin: 'http://localhost:5173', // クライアントのオリジン
@@ -20,6 +23,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+app.use(accessLog);
 app.use(bodyParser.json());
 app.use(cookieParser());
 
@@ -32,6 +37,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRouter);
 app.use('/blog', blogRouter);
 app.use('/contact', contactRouter);
+app.use("/access", accessRouter);
 
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
