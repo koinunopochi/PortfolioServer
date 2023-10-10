@@ -5,7 +5,7 @@ const {
   getBlogs,
   deleteBlog,
   getBlog,
-  getBloOverviews,
+  getBlogOverviews,
   updateBlog,
 } = require('../controller/blog');
 const { logger } = require('../lib/logger');
@@ -15,7 +15,7 @@ const { admin_route } = require('../lib/admin_route');
 // 未認証ルート
 router.get('/overviews', async (req, res, next) => {
   try {
-    const overviews = await getBloOverviews();
+    const overviews = await getBlogOverviews();
     res.json(overviews);
   } catch (err) {
     next(err);
@@ -56,10 +56,12 @@ router.use(admin_route);
 // 最低限追加が可能、バリデーションは自身しか使わないため、不要
 router.post('/', async (req, res, next) => {
   try {
-    const { title, content, overview } = req.body;
+    const { title, content, overview, category, tags } = req.body;
     const savedBlog = await insertBlog({
       title: title,
       overview: overview,
+      category: category,
+      tags: tags,
       content: content,
     });
     logger.debug(savedBlog);
@@ -75,11 +77,13 @@ router.post('/', async (req, res, next) => {
 });
 router.put('/:blogId', async (req, res, next) => {
   try {
-    const { title, content, overview } = req.body;
+    const { title, content, overview, category, tags } = req.body;
     const id = req.params.blogId;
-    const savedBlog = await updateBlog(id,{
+    const savedBlog = await updateBlog(id, {
       title: title,
       overview: overview,
+      category: category,
+      tags: tags,
       content: content,
     });
     logger.debug(savedBlog);
