@@ -8,6 +8,7 @@ const {
   deleteRefreshToken,
   insertUser,
   deleteUser,
+  updateAccessNum,
 } = require('../controller/user');
 const router = express.Router();
 
@@ -109,7 +110,9 @@ router.post('/login', async (req, res, next) => {
     });
     // リフレッシュトークンをDBに保存
     await insertRefreshToken(username, refreshToken);
-
+    // アクセス回数を更新
+    await updateAccessNum(username);
+    // クッキーにトークンを保存
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
