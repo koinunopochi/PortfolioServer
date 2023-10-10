@@ -3,6 +3,22 @@ const { MyCustomError } = require('../lib/custom_error');
 const { logger } = require('../lib/logger');
 const { getCollection } = require('./db_utils');
 
+const DbOperations = require('./DbOperations');
+
+const userOperations = new DbOperations('users');
+const refreshTokenOperations = new DbOperations('refresh_tokens');
+
+const insertUser = async (username, password, token, is_verify, role) => {
+  return await userOperations.insert({
+    username,
+    password,
+    token,
+    is_verify,
+    role,
+  });
+};
+exports.insertUser = insertUser;
+
 /**
  * 新しいユーザーをデータベースに追加します。
  *
@@ -27,16 +43,15 @@ const { getCollection } = require('./db_utils');
  * }
  */
 
-const insertUser = async (username, password, token, is_verify, role) => {
-  const collection = await getCollection('users');
-  const result = await collection
-    .insertOne({ username, password, token, is_verify, role })
-    .catch((err) => {
-      throw err;
-    });
-  return result;
-};
-exports.insertUser = insertUser;
+// const insertUser = async (username, password, token, is_verify, role) => {
+//   const collection = await getCollection('users');
+//   const result = await collection
+//     .insertOne({ username, password, token, is_verify, role })
+//     .catch((err) => {
+//       throw err;
+//     });
+//   return result;
+// };
 
 const getRefreshToken = async (username) => {
 const collection = await getCollection('refresh_tokens');
