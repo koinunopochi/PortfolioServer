@@ -19,61 +19,42 @@ const insertUser = async (username, password, token, is_verify, role) => {
 };
 exports.insertUser = insertUser;
 
-/**
- * 新しいユーザーをデータベースに追加します。
- *
- * @function
- * @async
- * @param {string} email - 新しいユーザーのメールアドレス
- * @param {string} password - 新しいユーザーのハッシュ化されたパスワード
- * @param {string} token - メールアドレス確認用のトークン
- * @param {boolean} is_verify - ユーザーのメールアドレスが確認されたかどうかを示すフラグ
- * @param {string} role - ユーザーの役割（例：admin, user など）
- *
- * @returns {Promise<Object>} - MongoDBからの挿入結果
- *
- * @throws {MyCustomError} - emailがすでに存在する場合のエラー
- *
- * @example
- * try {
- *   const result = await insertUser('test@example.com', 'hashedPassword123', 'verificationToken456', false, 'user');
- *   console.log(result);
- * } catch (error) {
- *   console.error(error);
- * }
- */
-
-// const insertUser = async (username, password, token, is_verify, role) => {
-//   const collection = await getCollection('users');
-//   const result = await collection
-//     .insertOne({ username, password, token, is_verify, role })
-//     .catch((err) => {
-//       throw err;
-//     });
+// const getRefreshToken = async (username) => {
+// const collection = await getCollection('refresh_tokens');
+//   const result = await collection.findOne(
+//     { username },
+//     { projection: { _id: 0, refresh_token: 1 } }
+//   );
 //   return result;
 // };
-
 const getRefreshToken = async (username) => {
-const collection = await getCollection('refresh_tokens');
-  const result = await collection.findOne(
-    { username },
-    { projection: { _id: 0, refresh_token: 1 } }
-  );
-  return result;
+  return await refreshTokenOperations.findOne(username, {
+    _id: 0,
+    refresh_token: 1,
+  });
 };
 exports.getRefreshToken = getRefreshToken;
 
+// const insertRefreshToken = async (username, refresh_token) => {
+//   const collection = await getCollection('refresh_tokens');
+//   const result = await collection.insertOne({ username, refresh_token });
+//   return result;
+// };
 const insertRefreshToken = async (username, refresh_token) => {
-const collection = await getCollection('refresh_tokens');
-  const result = await collection.insertOne({ username, refresh_token });
-  return result;
+  return await refreshTokenOperations.insert({
+    username,
+    refresh_token,
+  });
 };
 exports.insertRefreshToken = insertRefreshToken;
 
+// const deleteRefreshToken = async (username) => {
+//   const collection = await getCollection('refresh_tokens');
+//   const result = await collection.deleteOne({ username });
+//   return result;
+// };
 const deleteRefreshToken = async (username) => {
-const collection = await getCollection('refresh_tokens');
-  const result = await collection.deleteOne({ username });
-  return result;
+  return await refreshTokenOperations.delete({ username });
 };
 exports.deleteRefreshToken = deleteRefreshToken;
 
@@ -93,6 +74,12 @@ exports.deleteRefreshToken = deleteRefreshToken;
  *   .then(result => console.log(result))
  *   .catch(err => console.error(err));
  */
+// const deleteUser = async (primary_json) => {
+//   const collection = await getCollection('users');
+//   const result = await collection.deleteOne(primary_json);
+//   return result;
+// };
+// TODO:利用先の変更
 const deleteUser = async (primary_json) => {
   const collection = await getCollection('users');
   const result = await collection.deleteOne(primary_json);
@@ -113,14 +100,17 @@ exports.deleteUser = deleteUser;
  * この関数は、与えられたJSONクエリパラメータを使用してデータベースからユーザー情報を取得します。
  * ユーザー情報が見つからない場合は、カスタムエラーをスローします。
  */
+// const getUserInfo = async (username) => {
+//   const collection = await getCollection('users');
+//   const user = await collection.findOne(username);
+//   // logger.debug(user);
+//   // if (user === null) {
+//   //   throw new MyCustomError('NotFoundEmailError', 'email not found', 400);
+//   // }
+//   return user;
+// };
 const getUserInfo = async (username) => {
-  const collection = await getCollection('users');
-  const user = await collection.findOne(username);
-  // logger.debug(user);
-  // if (user === null) {
-  //   throw new MyCustomError('NotFoundEmailError', 'email not found', 400);
-  // }
-  return user;
+  return await userOperations.findOne(username);
 };
 exports.getUserInfo = getUserInfo;
 
@@ -136,6 +126,16 @@ exports.getUserInfo = getUserInfo;
  * この関数はデータベース内の特定のユーザー情報を更新します。最初のパラメータ（primary_json）を使用して特定のユーザーを識別し、
  * 2つ目のパラメータ（target_json）を使用してそのユーザーのデータを更新します。更新が成功した場合、結果オブジェクトを返します。
  */
+// const updateUser = async (primary_json, target_json) => {
+//   const collection = await getCollection('users');
+//   logger.debug(target_json);
+//   const result = await collection.updateOne(primary_json, {
+//     $set: target_json,
+//   });
+//   logger.debug(result);
+//   return result;
+// };
+// TODO：利用先の変更
 const updateUser = async (primary_json, target_json) => {
   const collection = await getCollection('users');
   logger.debug(target_json);
@@ -155,5 +155,8 @@ const updateAccessNum = async (username) => {
   );
   return result;
 };
-
+// TODO:対応が必要
+// const updateAccessNum = async (username) => {
+//   return await userOperations.update(username,)
+// };
 exports.updateAccessNum = updateAccessNum;
