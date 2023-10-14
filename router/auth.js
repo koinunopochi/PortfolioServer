@@ -2,7 +2,7 @@ const express = require('express');
 const { MyCustomError } = require('../lib/custom_error');
 const { ValidationPassword, ValidationParams } = require('../lib/validate');
 const {
-  getUserInfo,
+  getUserAll,
   insertRefreshToken,
   getRefreshToken,
   deleteRefreshToken,
@@ -34,7 +34,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
     ValidationPassword(password);
     // logger.debug(email);
     // userの存在確認
-    const user = await getUserInfo({ username });
+    const user = await getUserAll({ username });
     if (!user) {
       logger.debug(user);
       logger.debug('user is not exist');
@@ -80,7 +80,7 @@ router.post('/login', async (req, res, next) => {
     }
     ValidationPassword(password);
 
-    const user = await getUserInfo({ username });
+    const user = await getUserAll({ username });
 
     console.log(user);
 
