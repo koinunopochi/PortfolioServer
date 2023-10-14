@@ -80,9 +80,9 @@ exports.deleteRefreshToken = deleteRefreshToken;
 //   return result;
 // };
 // TODO:利用先の変更
-const deleteUser = async (primary_json) => {
+const deleteUser = async (username) => {
   const collection = await getCollection('users');
-  const result = await collection.deleteOne(primary_json);
+  const result = await collection.deleteOne({ username });
   return result;
 };
 exports.deleteUser = deleteUser;
@@ -136,6 +136,8 @@ exports.getUserInfo = getUserInfo;
 //   return result;
 // };
 // TODO：利用先の変更
+
+// 未使用
 const updateUser = async (primary_json, target_json) => {
   const collection = await getCollection('users');
   logger.debug(target_json);

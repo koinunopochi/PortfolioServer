@@ -43,7 +43,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
         throw new MyCustomError('ExistUserError', 'email already exists', 400);
       } else {
         // すでに未認証のユーザーが存在する場合は削除
-        await deleteUser({ username });
+        await deleteUser(username);
       }
     }
 
