@@ -34,7 +34,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
     ValidationPassword(password);
     // logger.debug(email);
     // userの存在確認
-    const user = await getUserAll({ username });
+    const user = await getUserAll(username);
     if (!user) {
       logger.debug(user);
       logger.debug('user is not exist');
@@ -80,7 +80,7 @@ router.post('/login', async (req, res, next) => {
     }
     ValidationPassword(password);
 
-    const user = await getUserAll({ username });
+    const user = await getUserAll(username);
 
     console.log(user);
 
