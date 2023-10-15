@@ -1,4 +1,4 @@
-const { getCollection } = require('./db_utils');
+const { getDb } = require('../lib/mongo');
 
 class DbOperations {
   constructor(collectionName) {
@@ -60,3 +60,8 @@ class DbOperations {
 }
 
 module.exports = DbOperations;
+
+const getCollection = async (collectionName) => {
+  const db = await getDb();
+  return db.collection(collectionName);
+};
