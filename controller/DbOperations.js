@@ -41,7 +41,7 @@ class DbOperations {
   async update(criteria, data) {
     const collection = await this._getCollection();
     const result = await collection
-      .updateOne(criteria, { $set: data })
+      .updateOne(criteria, data)
       .catch((err) => {
         throw err;
       });
