@@ -1,5 +1,4 @@
 const { logger } = require('../lib/logger');
-const { getCollection } = require('./db_utils');
 
 const DbOperations = require('./DbOperations');
 
@@ -93,45 +92,21 @@ exports.deleteRefreshToken = deleteRefreshToken;
  * @returns
  */
 const deleteUser = async (username) => {
-  const collection = await getCollection('users');
-  const result = await collection.deleteOne({ username });
+  const result = await userOperations.delete({ username });
   return result;
 };
 exports.deleteUser = deleteUser;
 
 // ###################  update周り  ################################
-
-// 未使用
-/**
- * ユーザー情報をアップデートする
- * 詳細不明
- * コードから、ユーザーをターゲットjsonの中に入っている情報でアップデートする
- * @param {JSON} primary_json
- * @param {JSON} target_json
- * @returns
- */
-const updateUser = async (primary_json, target_json) => {
-  const collection = await getCollection('users');
-  logger.debug(target_json);
-  const result = await collection.updateOne(primary_json, {
-    $set: target_json,
-  });
-  logger.debug(result);
-  return result;
-};
-exports.updateUser = updateUser;
-
 /**
  * ユーザーのアクセス数を変更する
  * @param {string} username ユーザー名
  * @returns
  */
 const updateAccessNum = async (username) => {
-  const collection = await getCollection('users');
-  const result = await collection.updateOne(
+  return await userOperations.update(
     { username },
     { $inc: { access_num: 1 } }
   );
-  return result;
 };
 exports.updateAccessNum = updateAccessNum;
