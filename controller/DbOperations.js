@@ -20,7 +20,7 @@ class DbOperations {
   async find(criteria, projection) {
     const collection = await this._getCollection();
     const result = await collection
-      .find(criteria, { projection })
+      .find(criteria, projection)
       .toArray()
       .catch((err) => {
         throw err;
@@ -31,7 +31,7 @@ class DbOperations {
   async findOne(criteria, projection) {
     const collection = await this._getCollection();
     const result = await collection
-      .findOne(criteria , { projection })
+      .findOne(criteria, projection)
       .catch((err) => {
         throw err;
       });
