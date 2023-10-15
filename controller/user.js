@@ -1,5 +1,3 @@
-// const { getDb } = require('../lib/mongo');
-// const { MyCustomError } = require('../lib/custom_error');
 const { logger } = require('../lib/logger');
 const { getCollection } = require('./db_utils');
 
