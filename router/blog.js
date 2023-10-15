@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   insertBlog,
-  getBlogs,
+  getAllBlogs,
   deleteBlog,
   getBlog,
   getBlogOverviews,
@@ -41,9 +41,12 @@ router.get('/:blogId', async (req, res, next) => {
 
 // とりあえずは、問題がない
 // 全部のブログの情報をとるが、あまりよくない
+// overviewsを使うべき
+// TODO:フロントのぷろじぇくとインデックスの部分で誤って使用しているため、変更する
 router.get('/', async (req, res, next) => {
   try {
-    const blogs = await getBlogs(); // 更新
+    const blogs = await getAllBlogs(); // 更新
+    // const blogs = await getBlogOverviews(); // 更新
     res.json(blogs);
   } catch (err) {
     next(err);
