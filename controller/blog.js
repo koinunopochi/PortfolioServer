@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const DbOperations = require('../utils/DbOperations');
+const DbOperations = require('../lib/DbOperations');
 
 const blogsCollection = new DbOperations('blogs');
 

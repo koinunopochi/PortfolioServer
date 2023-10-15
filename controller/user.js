@@ -1,6 +1,6 @@
 const { logger } = require('../utils/logger');
 
-const DbOperations = require('../utils/DbOperations');
+const DbOperations = require('../lib/DbOperations');
 
 const userOperations = new DbOperations('users');
 const refreshTokenOperations = new DbOperations('refresh_tokens');
