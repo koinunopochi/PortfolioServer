@@ -1,4 +1,4 @@
-const DbOperations = require('./DbOperations');
+const DbOperations = require('../utils/DbOperations');
 
 const accessCollection = new DbOperations('access_logs');
 
