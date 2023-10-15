@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const { logger } = require('./lib/logger');
+const { logger } = require('./utils/logger');
 
 const cors = require('cors');
 
@@ -13,9 +13,9 @@ const { router: blogRouter } = require('./router/blog');
 const { router: contactRouter } = require('./router/contact');
 const { router: accessRouter } = require('./router/access');
 
-const { MyCustomError } = require('./lib/custom_error');
+const { MyCustomError } = require('./utils/custom_error');
 const mongo = require('./lib/mongo');
-const { accessLog } = require('./lib/access_log');
+const { accessLog } = require('./utils/access_log');
 
 const corsOptions = {
   origin: 'http://localhost:5173', // クライアントのオリジン
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRouter);
 app.use('/blog', blogRouter);
 app.use('/contact', contactRouter);
-app.use("/access", accessRouter);
+app.use('/access', accessRouter);
 
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);

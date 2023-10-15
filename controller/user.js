@@ -1,4 +1,4 @@
-const { logger } = require('../lib/logger');
+const { logger } = require('../utils/logger');
 
 const DbOperations = require('../utils/DbOperations');
 
@@ -104,9 +104,6 @@ exports.deleteUser = deleteUser;
  * @returns
  */
 const updateAccessNum = async (username) => {
-  return await userOperations.update(
-    { username },
-    { $inc: { access_num: 1 } }
-  );
+  return await userOperations.update({ username }, { $inc: { access_num: 1 } });
 };
 exports.updateAccessNum = updateAccessNum;

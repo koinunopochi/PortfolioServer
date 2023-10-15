@@ -8,9 +8,9 @@ const {
   getBlogOverviews,
   updateBlog,
 } = require('../controller/blog');
-const { logger } = require('../lib/logger');
-const { MyCustomError } = require('../lib/custom_error');
-const { admin_route } = require('../lib/admin_route');
+const { logger } = require('../utils/logger');
+const { MyCustomError } = require('../utils/custom_error');
+const { admin_route } = require('../utils/admin_route');
 
 // 未認証ルート
 router.get('/overviews', async (req, res, next) => {

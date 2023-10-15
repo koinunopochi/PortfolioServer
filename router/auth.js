@@ -1,6 +1,6 @@
 const express = require('express');
-const { MyCustomError } = require('../lib/custom_error');
-const { ValidationPassword, ValidationParams } = require('../lib/validate');
+const { MyCustomError } = require('../utils/custom_error');
+const { ValidationPassword, ValidationParams } = require('../utils/validate');
 const {
   getUserAll,
   insertRefreshToken,
@@ -15,8 +15,8 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { logger } = require('../lib/logger');
-const { admin_route, isAdmin } = require('../lib/admin_route');
+const { logger } = require('../utils/logger');
+const { admin_route, isAdmin } = require('../utils/admin_route');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;

@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const { logger } = require('../lib/logger');
+const { logger } = require('../utils/logger');
 
-const { MyCustomError } = require('../lib/custom_error');
+const { MyCustomError } = require('../utils/custom_error');
 const { getAccessLogs } = require('../controller/access_log');
-const { admin_route } = require('../lib/admin_route');
+const { admin_route } = require('../utils/admin_route');
 
-router.get('/',admin_route, async (req, res, next) => {
+router.get('/', admin_route, async (req, res, next) => {
   try {
     const { start } = req.query;
     let { end } = req.query;

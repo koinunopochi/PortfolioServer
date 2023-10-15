@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { logger } = require('../lib/logger');
+const { logger } = require('../utils/logger');
 
-const { MyCustomError } = require('../lib/custom_error');
-const { SendMail } = require('../lib/mail');
+const { MyCustomError } = require('../utils/custom_error');
+const { SendMail } = require('../utils/mail');
 
 router.post('/', async (req, res, next) => {
   try {
