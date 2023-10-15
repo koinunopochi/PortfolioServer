@@ -1,4 +1,4 @@
-const { getDb } = require('../lib/mongo');
+const { getDb } = require('./mongo');
 
 /**
  * MongoDBの操作をまとめたクラス。
