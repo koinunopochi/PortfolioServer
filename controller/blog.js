@@ -30,22 +30,27 @@ const insertBlog = async (title,content,overview,category,tags,role,date,update_
   });
 }
 /**
- * idに合致するblogの情報をアップデートする
- * @param {string} id blog id
- * @param {JSON} data json data
+ * blogを更新する
+ * @param {string} id 
+ * @param {string} title タイトル
+ * @param {string} content 内容
+ * @param {string} overview 概要
+ * @param {string} category info, portfolio, blogのいずれか
+ * @param {string} tags タグ
+ * @param {string} role 
  * @returns 
  */
-const updateBlog = async (id, data) => {
+const updateBlog = async (id, title,content,category,tags,role,overview) => {
   return await blogsCollection.update(
     { _id: new ObjectId(id) },
     {
       $set: {
-        title: data.title,
-        content: data.content,
-        category: data.category,
-        tags: data.tags,
-        role: data.role,
-        overview: data.overview,
+        title,
+        content,
+        category,
+        tags,
+        role,
+        overview,
         update_date: new Date(),
       },
     }
