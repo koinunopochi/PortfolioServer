@@ -61,11 +61,11 @@ router.post('/', async (req, res, next) => {
   try {
     const { title, content, overview, category, tags } = req.body;
     const savedBlog = await insertBlog(
-      title=title,
-      content=content,
-      overview=overview,
-      category=category,
-      tags=tags,
+      title,
+      content,
+      overview,
+      category,
+      tags
     );
     logger.debug(savedBlog);
     logger.info('id:' + savedBlog.insertedId);
@@ -82,13 +82,14 @@ router.put('/:blogId', async (req, res, next) => {
   try {
     const { title, content, overview, category, tags } = req.body;
     const id = req.params.blogId;
-    const savedBlog = await updateBlog(id, {
-      title: title,
-      overview: overview,
-      category: category,
-      tags: tags,
-      content: content,
-    });
+    const savedBlog = await updateBlog(
+      id,
+      title,
+      content,
+      overview,
+      category,
+      tags
+    );
     logger.debug(savedBlog);
     logger.info('id:' + savedBlog.insertedId);
     res.json({
