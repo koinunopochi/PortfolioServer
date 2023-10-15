@@ -31,7 +31,7 @@ class DbOperations {
   async findOne(criteria, projection) {
     const collection = await this._getCollection();
     const result = await collection
-      .findOne(criteria, { projection })
+      .findOne(criteria , { projection })
       .catch((err) => {
         throw err;
       });
@@ -47,7 +47,7 @@ class DbOperations {
       });
     return result;
   }
-  
+
   async delete(criteria) {
     const collection = await this._getCollection();
     const result = await collection.deleteOne(criteria).catch((err) => {

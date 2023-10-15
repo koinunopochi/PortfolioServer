@@ -18,10 +18,16 @@ const refreshTokenOperations = new DbOperations('refresh_tokens');
  * @param {string} role adminかuserか
  * @returns insertした結果を表示
  */
-const insertUser = async (username, hashed_password, token, is_verify, role) => {
+const insertUser = async (
+  username,
+  hashed_password,
+  token,
+  is_verify,
+  role
+) => {
   return await userOperations.insert({
     username,
-    password:hashed_password,
+    password: hashed_password,
     token,
     is_verify,
     role,
@@ -42,35 +48,40 @@ const insertRefreshToken = async (username, refresh_token) => {
 };
 exports.insertRefreshToken = insertRefreshToken;
 
+// ###################  get周り  ################################
+
 /**
  * ユーザーに関する情報をすべて取得する関数
  * @param {string} username ユーザー名
  * @returns getで得た結果を返す
  */
 const getUserAll = async (username) => {
-  return await userOperations.findOne(username);
+  const result = await userOperations.findOne({ username });
+  logger.debug(result);
+  return result;
 };
 exports.getUserAll = getUserAll;
 
-
-// ###################  get周り  ################################
 /**
  * リフレッシュトークンの取得
- * @param {string} username 
+ * @param {string} username
  * @returns 取得した結果を返す
  */
 const getRefreshToken = async (username) => {
-  return await refreshTokenOperations.findOne(username, {
-    _id: 0,
-    refresh_token: 1,
-  });
+  return await refreshTokenOperations.findOne(
+    { username },
+    {
+      _id: 0,
+      refresh_token: 1,
+    }
+  );
 };
 exports.getRefreshToken = getRefreshToken;
 
 // ###################  delete周り  ################################
 /**
  * リフレッシュトークンの削除
- * @param {string} username 
+ * @param {string} username
  * @returns 結果を返す
  */
 const deleteRefreshToken = async (username) => {
@@ -80,8 +91,8 @@ exports.deleteRefreshToken = deleteRefreshToken;
 
 /**
  * ユーザーの削除を行う
- * @param {string} username 
- * @returns 
+ * @param {string} username
+ * @returns
  */
 const deleteUser = async (username) => {
   const collection = await getCollection('users');
@@ -97,9 +108,9 @@ exports.deleteUser = deleteUser;
  * ユーザー情報をアップデートする
  * 詳細不明
  * コードから、ユーザーをターゲットjsonの中に入っている情報でアップデートする
- * @param {JSON} primary_json 
- * @param {JSON} target_json 
- * @returns 
+ * @param {JSON} primary_json
+ * @param {JSON} target_json
+ * @returns
  */
 const updateUser = async (primary_json, target_json) => {
   const collection = await getCollection('users');
@@ -115,7 +126,7 @@ exports.updateUser = updateUser;
 /**
  * ユーザーのアクセス数を変更する
  * @param {string} username ユーザー名
- * @returns 
+ * @returns
  */
 const updateAccessNum = async (username) => {
   const collection = await getCollection('users');
