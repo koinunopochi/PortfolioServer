@@ -13,7 +13,7 @@ router.get('/',admin_route, async (req, res, next) => {
     let { end } = req.query;
     logger.info(req.query);
     if (!start) {
-      throw new MyCustomError('InvalidStartTime', 'invalid start_time', 400);
+      throw new MyCustomError('InvalidStartTime', 'startの値は必須です。', 400);
     }
     if (!end) {
       end = new Date();
