@@ -60,13 +60,13 @@ router.use(admin_route);
 router.post('/', async (req, res, next) => {
   try {
     const { title, content, overview, category, tags } = req.body;
-    const savedBlog = await insertBlog({
-      title: title,
-      overview: overview,
-      category: category,
-      tags: tags,
-      content: content,
-    });
+    const savedBlog = await insertBlog(
+      title=title,
+      content=content,
+      overview=overview,
+      category=category,
+      tags=tags,
+    );
     logger.debug(savedBlog);
     logger.info('id:' + savedBlog.insertedId);
     res.json({

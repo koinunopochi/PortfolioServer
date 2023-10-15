@@ -4,20 +4,29 @@ const DbOperations = require('./DbOperations');
 const blogsCollection = new DbOperations('blogs');
 
 /**
- * blogの追加
- * @param {JSON} data 
+ * blogを挿入する
+ * @param {string} title タイトル
+ * @param {string} content 内容
+ * @param {string} overview 概要
+ * @param {string} category info, portfolio, blogのいずれか
+ * @param {string} tags タグ
+ * @param {string} role 
+ * @param {Date} date 最初の投稿日
+ * @param {Date} update_date 更新日
  * @returns 
  */
-const insertBlog = async (data) => {
+const insertBlog = async (title,content,overview,category,tags,role,date,update_date) => {
+  const date_ = date || new Date();
+  const update_date_ = update_date || new Date();
   return await blogsCollection.insert({
-    title: data.title,
-    content: data.content,
-    overview: data.overview,
-    category: data.category,
-    tags: data.tags,
-    role: data.role,
-    date: data.date || new Date(),
-    update_date: data.update_date || new Date(),
+    title,
+    content,
+    overview,
+    category,
+    tags,
+    role,
+    date: date_,
+    update_date:update_date_
   });
 }
 /**
