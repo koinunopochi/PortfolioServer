@@ -9,7 +9,7 @@ const {
   updateBlog,
 } = require('../controller/blog');
 const { logger } = require('../lib/logger');
-const { MyCustomError } = require('../utils/custom_error');
+const { MyCustomError } = require('../utils/CustomError');
 const { admin_route } = require('../utils/admin_route');
 
 // 未認証ルート

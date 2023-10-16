@@ -1,5 +1,5 @@
 const express = require('express');
-const { MyCustomError } = require('../utils/custom_error');
+const { MyCustomError } = require('../utils/CustomError');
 const { ValidationPassword, ValidationParams } = require('../utils/validate');
 const {
   getUserAll,
@@ -155,7 +155,7 @@ router.post('/logout', async (req, res, next) => {
       );
     }
     // usernameを取得
-    const username = decodeItem(refreshToken, 'username', 'refresh')
+    const username = decodeItem(refreshToken, 'username', 'refresh');
     // リフレッシュトークンを削除
     await deleteRefreshToken(username);
     // Cookieを削除
@@ -200,7 +200,7 @@ router.post('/refresh', async (req, res, next) => {
     // パラメータのチェック
     ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
-    const username = decodeItem(refreshToken, 'username', 'refresh')
+    const username = decodeItem(refreshToken, 'username', 'refresh');
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
       // 変更した部分

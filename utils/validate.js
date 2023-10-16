@@ -1,5 +1,5 @@
 const express = require('express');
-const ValidationError = require('./custom_error').ValidationError;
+const ValidationError = require('./CustomError').ValidationError;
 const { logger } = require('../lib/logger');
 const cookieParser = require('cookie-parser');
 // 認証回り
@@ -28,7 +28,6 @@ const ValidationPassword = (password) => {
   }
 };
 exports.ValidationPassword = ValidationPassword;
-
 
 // parseJsonを呼び，ラップしてエラーハンドリングができるようにしている
 const parseJSON = async (req, res, next) => {
@@ -81,11 +80,11 @@ exports.ParseCookie = ParseCookie;
  * @function
  * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
  * @param {Array<string>} allowedParams - 許可されるパラメータの配列
- * 
+ *
  * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
- * 
+ *
  * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
- * 
+ *
  * @description
  * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
  * もし許可されていないパラメータがあれば、ValidationErrorをスローします。それ以外の場合は、trueを返します。
@@ -143,7 +142,7 @@ const ValidationNumber = (num) => {
     throw new ValidationError('この項目は定義必須です');
   } else if (num == '') {
     throw new ValidationError('この項目は入力必須です');
-  }else if(isNaN(num)){
+  } else if (isNaN(num)) {
     throw new ValidationError('この項目は数字のみ入力可能です');
   } else {
     return true;

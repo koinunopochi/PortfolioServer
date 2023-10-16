@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { logger } = require('../lib/logger');
 
-const { MyCustomError } = require('../utils/custom_error');
+const { MyCustomError } = require('../utils/CustomError');
 const { SendMail } = require('../lib/mail');
 
 router.post('/', async (req, res, next) => {
