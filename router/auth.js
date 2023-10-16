@@ -58,11 +58,6 @@ router.post('/signup', admin_route, async (req, res, next) => {
       'user'
     );
 
-    // const url = `http://localhost:3000/auth/verify?token=${verificationToken}`;
-    // // メールの送信
-    // await SendMail(email, url);
-    // response
-
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
