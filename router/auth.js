@@ -13,7 +13,13 @@ const {
   ensureUserVerified,
   handleExistingRefreshToken,
 } = require('../utils/validate');
-const { deleteRefreshToken, insertUser, getUserAll, insertRefreshToken, updateAccessNum } = require('../controller/user');
+const {
+  deleteRefreshToken,
+  insertUser,
+  getUserAll,
+  insertRefreshToken,
+  updateAccessNum,
+} = require('../controller/user');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
@@ -24,15 +30,16 @@ const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 /**
  * ユーザー名とパスワードを受け取り、ユーザーを登録します。
- * 
+ *
  * この関数は以下の手順を実行します：
  * 1. パスワードをハッシュ化します。
  * 2. 認証トークンを生成します。
  * 3. ユーザー情報をデータベースに保存します。
- * 
+ *
  * @param {string} username - 登録するユーザー名
  * @param {string} password - ユーザーの生のパスワード
  * @returns {Promise<object>} 登録したユーザーの情報
@@ -83,7 +90,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
 
 /**
  * ユーザー名とパスワードを受け取り、ユーザーを認証してJWTとリフレッシュトークンを生成します。
- * 
+ *
  * この関数は以下の手順を実行します：
  * 1. ログインの資格情報を検証します。
  * 2. ユーザーの存在を検証します。
@@ -93,26 +100,30 @@ router.post('/signup', admin_route, async (req, res, next) => {
  * 6. JWTとリフレッシュトークンを生成します。
  * 7. リフレッシュトークンをDBに保存します。
  * 8. ユーザーのアクセス回数を更新します。
- * 
+ *
  * @param {string} username - ユーザー名
  * @param {string} password - パスワード
  * @returns {object} 生成されたトークンを含むオブジェクト。形式：{ token, refreshToken }
  * @throws {MyCustomError} ユーザーが存在しない、パスワードが一致しない、ユーザーが認証済みでない場合にエラーを投げます。
  */
 const loginUser = async (username, password) => {
-  validateLoginCredentials({ username, password });
+  try {
+    validateLoginCredentials({ username, password });
 
-  const user = await getUserAll(username);
-  validateUserExistence(user);
-  validatePasswordMatch(password, user.password);
-  ensureUserVerified(user);
-  handleExistingRefreshToken(username);
+    const user = await getUserAll(username);
+    validateUserExistence(user);
+    await validatePasswordMatch(password, user.password);
+    ensureUserVerified(user);
+    await handleExistingRefreshToken(username);
 
-  const { token, refreshToken } = generateTokens(username);
-  await insertRefreshToken(username, refreshToken);
-  await updateAccessNum(username);
+    const { token, refreshToken } = generateTokens(username);
+    await insertRefreshToken(username, refreshToken);
+    await updateAccessNum(username);
 
-  return { token, refreshToken };
+    return { token, refreshToken };
+  } catch(error) {
+    throw error;
+  }
 };
 
 /**

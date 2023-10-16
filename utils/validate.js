@@ -6,6 +6,7 @@ const {
 } = require('../controller/user');
 
 const bcrypt = require('bcrypt');
+const { MyCustomError } = require('../lib/CustomError');
 
 const ValidationError = require('../lib/CustomError').ValidationError;
 
@@ -13,7 +14,7 @@ const ValidationError = require('../lib/CustomError').ValidationError;
  * 入力されたパスワードが正しい形式であるかを検証します。
  * パスワードは、小文字、大文字、数字、特殊文字をそれぞれ1文字以上含み、
  * 全体として8〜128文字の長さである必要があります。
- * 
+ *
  * @param {string} password - 検証するパスワード
  * @returns {boolean} パスワードが正しい形式である場合はtrue
  * @throws {ValidationError} パスワードが未定義、または不正な形式の場合
@@ -32,7 +33,6 @@ const ValidationPassword = (password) => {
 };
 
 exports.ValidationPassword = ValidationPassword;
-
 
 /**
  * @function
@@ -84,7 +84,7 @@ exports.validateLoginCredentials = validateLoginCredentials;
  * @param {Object} user - 検証するユーザーオブジェクト
  * @throws {MyCustomError} ユーザが存在しない場合
  */
-const validateUserExistence = async (user) => {
+const validateUserExistence = (user) => {
   if (!user) {
     throw new MyCustomError('NotExistUser', 'not exist user', 400);
   }
