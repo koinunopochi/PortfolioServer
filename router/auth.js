@@ -194,7 +194,6 @@ router.post('/refresh', async (req, res, next) => {
     // このルートの保護はしない
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      logger.debug('refresh_token:' + refreshToken);
       throw new MyCustomError(
         'InvalidRefreshToken',
         'invalid refresh token',
@@ -205,11 +204,8 @@ router.post('/refresh', async (req, res, next) => {
     logger.info('called /refresh');
     // パラメータのチェック
     ValidationParams(req.body, []);
-    // リフレッシュトークンの検証
-    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
-    logger.debug(decoded);
-    // usernameを取得
-    const username = decoded.username; // 変更した部分
+    // リフレッシュトークンの検証　＆　usernameの取得
+    const username = decodeItem(refreshToken, 'username', 'refresh')
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
       // 変更した部分
