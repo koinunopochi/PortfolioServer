@@ -5,17 +5,21 @@ const {
 } = require('../lib/CustomError');
 const {
   ValidationParams,
-  loginUser,
   validateSignupRequest,
   checkExistingUser,
+  validateLoginCredentials,
+  validateUserExistence,
+  validatePasswordMatch,
+  ensureUserVerified,
+  handleExistingRefreshToken,
 } = require('../utils/validate');
-const { deleteRefreshToken, insertUser } = require('../controller/user');
+const { deleteRefreshToken, insertUser, getUserAll, insertRefreshToken, updateAccessNum } = require('../controller/user');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
 const { admin_route, isAdmin } = require('../utils/adminRoute');
-const { decodeItem } = require('../lib/jwtHelper');
+const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
@@ -64,6 +68,22 @@ router.post('/signup', admin_route, async (req, res, next) => {
     next(error);
   }
 });
+
+const loginUser = async (username, password) => {
+  validateLoginCredentials({ username, password });
+
+  const user = await getUserAll(username);
+  validateUserExistence(user);
+  validatePasswordMatch(password, user.password);
+  ensureUserVerified(user);
+  handleExistingRefreshToken(username);
+
+  const { token, refreshToken } = generateTokens(username);
+  await insertRefreshToken(username, refreshToken);
+  await updateAccessNum(username);
+
+  return { token, refreshToken };
+};
 
 /**
  * @route POST /login
