@@ -4,7 +4,7 @@ const router = express.Router();
 const { logger } = require('../lib/logger');
 
 const { MyCustomError } = require('../lib/CustomError');
-const { getAccessLogs } = require('../controller/access_log');
+const { getAccessLogs } = require('../controller/accessLog');
 const { admin_route } = require('../utils/adminRoute');
 
 /**
