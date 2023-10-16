@@ -17,6 +17,7 @@ const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
 
+// TODO: 本番環境では、許可するオリジンを厳密に指定する
 const corsOptions = {
   origin: 'http://localhost:5173', // クライアントのオリジン
   credentials: true, // クレデンシャル（Cookie）を許可
@@ -43,11 +44,6 @@ app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
 });
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 /**
  * @route USE /* - すべてのルート
