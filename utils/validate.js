@@ -149,3 +149,60 @@ const ValidationNumber = (num) => {
   }
 };
 exports.ValidationNumber = ValidationNumber;
+
+
+const {
+  getUserAll,
+  insertRefreshToken,
+  getRefreshToken,
+  deleteRefreshToken,
+  updateAccessNum,
+} = require('../controller/user');
+
+require('dotenv').config();
+const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
+
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// 仮置き
+// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
+const loginUser = async (username, password) => {
+  ValidationParams({ username, password }, ['username', 'password']);
+
+  if (username == '') {
+    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
+  }
+  ValidationPassword(password);
+
+  const user = await getUserAll(username);
+
+  if (!user) {
+    throw new MyCustomError('NotExistUser', 'not exist user', 400);
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new MyCustomError('InvalidPassword', 'invalid password', 400);
+  }
+  if (!user.is_verify) {
+    throw new MyCustomError('InvalidUser', 'invalid user', 400);
+  }
+
+  const is_refresh_token = await getRefreshToken(username);
+  if (is_refresh_token) {
+    await deleteRefreshToken(username);
+  }
+
+  const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
+    expiresIn: '7d',
+  });
+
+  await insertRefreshToken(username, refreshToken);
+  await updateAccessNum(username);
+
+  return { token, refreshToken };
+};
+
+exports.loginUser = loginUser;

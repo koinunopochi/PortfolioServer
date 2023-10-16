@@ -3,7 +3,11 @@ const {
   MyCustomError,
   InvalidRefreshTokenError,
 } = require('../lib/CustomError');
-const { ValidationPassword, ValidationParams } = require('../utils/validate');
+const {
+  ValidationPassword,
+  ValidationParams,
+  loginUser,
+} = require('../utils/validate');
 const {
   getUserAll,
   insertRefreshToken,
@@ -67,58 +71,28 @@ router.post('/signup', admin_route, async (req, res, next) => {
   }
 });
 
-// login API
+/**
+ * @route POST /login
+ * @group User - ユーザーの操作に関するエンドポイント
+ * @param {string} username.body.required - ユーザー名
+ * @param {string} password.body.required - パスワード
+ * @returns {object} 200 - ログイン成功時のレスポンス
+ * @returns {Error} 400 - 無効なユーザー名、パスワード、またはその他のエラー
+ * @returns {Error} 401 - 認証に関するエラー
+ * @security JWT
+ */
 router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    ValidationParams(req.body, ['username', 'password']);
-    if (username == '') {
-      throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-    }
-    ValidationPassword(password);
-
-    const user = await getUserAll(username);
-
-    console.log(user);
-
-    if (!user) {
-      throw new MyCustomError('NotExistUser', 'not exist user', 400);
-    }
-    const is_password = await bcrypt.compare(password, user.password);
-    if (!is_password) {
-      throw new MyCustomError('InvalidPassword', 'invalid password', 400);
-    }
-    if (!user.is_verify) {
-      throw new MyCustomError('InvalidUser', 'invalid user', 400);
-    }
-
-    // リフレッシュトークンがあるか確認
-    const is_refresh_token = await getRefreshToken(username);
-    // logger.debug("is_refresh_token:"+is_refresh_token.refresh_token);
-    // リフレッシュトークンがある場合は削除
-    if (is_refresh_token) {
-      await deleteRefreshToken(username);
-    }
-
-    // JWTを発行
-    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
-      expiresIn: '7d',
-    });
-    // リフレッシュトークンをDBに保存
-    await insertRefreshToken(username, refreshToken);
-    // アクセス回数を更新
-    await updateAccessNum(username);
+    const { token, refreshToken } = await loginUser(username, password);
     // クッキーにトークンを保存
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
-      // sameSite: 'None',
     });
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: false,
-      // sameSite: 'None',
     });
 
     res.json({ message: 'Login successful' });
@@ -131,7 +105,7 @@ router.post('/login', async (req, res, next) => {
  * ユーザーのログアウトを処理するエンドポイント。
  * 提供されたリフレッシュトークンを使用して、サーバー側で該当のトークンを無効化し、
  * クライアントの認証トークンとリフレッシュトークンの両方のクッキーをクリアします。
- * 
+ *
  * @route POST /logout
  * @param {Request} req - Expressのリクエストオブジェクト。
  * @param {Response} res - Expressのレスポンスオブジェクト。
@@ -164,7 +138,7 @@ router.post('/logout', async (req, res, next) => {
 /**
  * リフレッシュトークンを使用して新しい認証トークンを取得するエンドポイント。
  * クライアントが有効なリフレッシュトークンを持っている場合、新しい認証トークンが返されます。
- * 
+ *
  * @route POST /refresh
  * @param {Request} req - Expressのリクエストオブジェクト。
  * @param {Response} res - Expressのレスポンスオブジェクト。
