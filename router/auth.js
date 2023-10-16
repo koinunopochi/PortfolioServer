@@ -23,7 +23,6 @@ const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 router.post('/signup', admin_route, async (req, res, next) => {
   try {
-    logger.info('called /signup');
     const { username, password } = req.body;
     // パラメータのチェック
     ValidationParams(req.body, ['username', 'password']);
@@ -62,7 +61,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
     // // メールの送信
     // await SendMail(email, url);
     // response
-    logger.info('finish /signup');
+
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
@@ -74,7 +73,6 @@ router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     ValidationParams(req.body, ['username', 'password']);
-    // ValidationEmail(email);
     if (username == '') {
       throw new MyCustomError('InvalidUsername', 'invalid username', 400);
     }
