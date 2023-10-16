@@ -123,22 +123,7 @@ router.post('/login', async (req, res, next) => {
     next(err);
   }
 });
-/**
- * @route POST /logout
- * @group Authentication - 認証関連のエンドポイント
- * @param {express.Request} req - Expressリクエストオブジェクト
- * @param {express.Response} res - Expressレスポンスオブジェクト
- * @param {express.NextFunction} next - Expressのnext関数
- * @returns {Object} 200 - ログアウト成功, クッキーが削除された
- * @returns {Error} default - 予期しないエラー
- *
- * @description
- * このエンドポイントはユーザーをログアウトし、認証とリフレッシュトークンを無効にします。
- * まず、リクエストからリフレッシュトークンを取得し、トークンを検証して関連するメールアドレスを取得します。
- * 次に、データベースからリフレッシュトークンを削除し、クライアントのクッキーから認証とリフレッシュトークンを削除します。
- * 処理が成功した場合、クライアントに「success」メッセージとともに200のステータスコードを返します。
- * エラーが発生した場合、エラーは次のミドルウェア関数に渡されます。
- */
+
 router.post('/logout', async (req, res, next) => {
   try {
     // logger.info('called /logout');
@@ -168,22 +153,7 @@ router.post('/logout', async (req, res, next) => {
   }
 });
 
-/**
- * @route POST /refresh
- * @group Authentication - 認証関連のエンドポイント
- * @param {express.Request} req - Expressリクエストオブジェクト
- * @param {express.Response} res - Expressレスポンスオブジェクト
- * @param {express.NextFunction} next - Expressのnext関数
- * @returns {Object} 200 - 新しい認証トークンが生成され、クッキーに保存された
- * @returns {Error}  default - 予期しないエラー
- * @security JWT
- *
- * @description
- * このエンドポイントは、有効なリフレッシュトークンがクッキーに存在する場合、新しい認証トークンを生成します。
- * リフレッシュトークンはJWTを検証し、その情報を基に新しい認証トークンを生成します。
- * 新しい認証トークンはクッキーに保存され、クライアントに成功のレスポンスが返されます。
- * エラーが発生した場合、エラーハンドラがエラーを処理します。
- */
+
 router.post('/refresh', async (req, res, next) => {
   try {
     // このルートの保護はしない
@@ -195,8 +165,6 @@ router.post('/refresh', async (req, res, next) => {
         401
       );
     }
-    logger.debug(refreshToken);
-    logger.info('called /refresh');
     // パラメータのチェック
     ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
@@ -215,6 +183,19 @@ router.post('/refresh', async (req, res, next) => {
   }
 });
 
+
+
+/**
+ * リクエストが管理者かどうかをチェックするエンドポイント。
+ * 
+ * @route GET /is-admin
+ * @param {Object} req - Expressのリクエストオブジェクト。
+ * @param {Object} res - Expressのレスポンスオブジェクト。
+ * @param {function} next - Expressのミドルウェア関数。
+ * @returns {Object} JSON - 管理者であるかどうかを示すブーリアン値を含むオブジェクト（例: { is_admin: true }）。
+ * @throws {MyCustomError} TokenExpiredError - トークンが期限切れの場合にカスタムエラーをスローします。
+ * @throws {Error} その他のエラーが発生した場合にエラーをスローします。
+ */
 router.get('/is-admin', async (req, res, next) => {
   try {
     const is_admin = await isAdmin(req);
@@ -227,5 +208,6 @@ router.get('/is-admin', async (req, res, next) => {
     next(error);
   }
 });
+
 
 exports.router = router;
