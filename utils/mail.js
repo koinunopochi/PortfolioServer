@@ -20,12 +20,13 @@ const porter = nodemailer.createTransport({
 /**
  * @function SendMail
  * @param {string} getter - 受信者のメールアドレス
- * @param {string} url - 認証用のURL
+ * @param {string} subject - メールの件名
+ * @param {string} content - メールの内容
  * @description
- * この関数は認証用のURLを含むメールをユーザーに送信します。メールの送信に失敗した場合は、コンソールにエラーメッセージが表示されます。送信に成功した場合は、コンソールに成功メッセージが表示されます。
+ * メールを送信する関数
  *
  * @example
- * SendMail('example@example.com', 'http://example.com/auth');
+ * SendMail('example@hogehoge.com', 'tatoe_件名', 'tatoe_本文')
  */
 const SendMail = (getter, subject, content) => {
   return new Promise((resolve, reject) => {
