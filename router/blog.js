@@ -10,7 +10,7 @@ const {
 } = require('../controller/blog');
 const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../lib/CustomError');
-const { admin_route } = require('../utils/admin_route');
+const { admin_route } = require('../utils/adminRoute');
 
 // 未認証ルート
 router.get('/overviews', async (req, res, next) => {

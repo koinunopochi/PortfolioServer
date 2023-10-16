@@ -5,7 +5,7 @@ const { logger } = require('../lib/logger');
 
 const { MyCustomError } = require('../lib/CustomError');
 const { getAccessLogs } = require('../controller/access_log');
-const { admin_route } = require('../utils/admin_route');
+const { admin_route } = require('../utils/adminRoute');
 
 /**
  * GET / - アクセスログを取得します

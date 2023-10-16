@@ -16,7 +16,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
-const { admin_route, isAdmin } = require('../utils/admin_route');
+const { admin_route, isAdmin } = require('../utils/adminRoute');
 const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
