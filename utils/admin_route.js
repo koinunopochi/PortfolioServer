@@ -23,6 +23,7 @@ const protect = async (req, res, next) => {
     }
     next();
   } catch (error) {
+    // トークンの有効期限が切れている場合はエラーを投げる
     if (error.name === 'TokenExpiredError') {
       next(new MyCustomError('TokenExpiredError', 'token expired', 400));
     }
