@@ -50,14 +50,13 @@ const {
   deleteRefreshToken,
   updateAccessNum,
   deleteUser,
-  insertUser,
 } = require('../controller/user');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+
 const jwt = require('jsonwebtoken');
 
 // 仮置き

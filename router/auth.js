@@ -9,7 +9,7 @@ const {
   validateSignupRequest,
   checkExistingUser,
 } = require('../utils/validate');
-const { deleteRefreshToken } = require('../controller/user');
+const { deleteRefreshToken, insertUser } = require('../controller/user');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
@@ -19,6 +19,7 @@ const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
+const crypto = require('crypto');
 
 
 const registerUser = async (username, password) => {
