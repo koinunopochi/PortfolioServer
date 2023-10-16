@@ -1,5 +1,8 @@
 const express = require('express');
-const { MyCustomError } = require('../lib/CustomError');
+const {
+  MyCustomError,
+  InvalidRefreshTokenError,
+} = require('../lib/CustomError');
 const { ValidationPassword, ValidationParams } = require('../utils/validate');
 const {
   getUserAll,
@@ -132,12 +135,7 @@ router.post('/logout', async (req, res, next) => {
     ValidationParams(req.body, []);
     // リフレッシュトークンの存在確認
     if (!refreshToken) {
-      logger.debug('refresh_token:' + refreshToken);
-      throw new MyCustomError(
-        'InvalidRefreshToken',
-        'invalid refresh token',
-        401
-      );
+      throw new InvalidRefreshTokenError();
     }
     // usernameを取得
     const username = decodeItem(refreshToken, 'username', 'refresh');
@@ -153,17 +151,22 @@ router.post('/logout', async (req, res, next) => {
   }
 });
 
-
+/**
+ * リフレッシュトークンを使用して新しい認証トークンを取得するエンドポイント。
+ * クライアントが有効なリフレッシュトークンを持っている場合、新しい認証トークンが返されます。
+ * 
+ * @route POST /refresh
+ * @param {Request} req - Expressのリクエストオブジェクト。
+ * @param {Response} res - Expressのレスポンスオブジェクト。
+ * @param {NextFunction} next - Expressのnext関数。
+ * @throws {InvalidRefreshTokenError} - 有効なリフレッシュトークンが提供されない場合にスローされるエラー。
+ * @returns {Object} 200 - 新しい認証トークンが正常に発行されたことを示すレスポンス。
+ */
 router.post('/refresh', async (req, res, next) => {
   try {
-    // このルートの保護はしない
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      throw new MyCustomError(
-        'InvalidRefreshToken',
-        'invalid refresh token',
-        401
-      );
+      throw new InvalidRefreshTokenError();
     }
     // パラメータのチェック
     ValidationParams(req.body, []);
@@ -171,23 +174,19 @@ router.post('/refresh', async (req, res, next) => {
     const username = decodeItem(refreshToken, 'username', 'refresh');
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
-      // 変更した部分
       expiresIn: '15m',
     });
     // クッキーにトークンを保存
     res.cookie('authToken', token, { httpOnly: true });
     res.status(200).json({ message: 'success' });
   } catch (error) {
-    logger.error(error);
     next(error);
   }
 });
 
-
-
 /**
  * リクエストが管理者かどうかをチェックするエンドポイント。
- * 
+ *
  * @route GET /is-admin
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} res - Expressのレスポンスオブジェクト。
@@ -208,6 +207,5 @@ router.get('/is-admin', async (req, res, next) => {
     next(error);
   }
 });
-
 
 exports.router = router;
