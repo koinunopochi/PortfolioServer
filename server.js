@@ -15,7 +15,7 @@ const { router: accessRouter } = require('./router/access');
 
 const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
-const { accessLog } = require('./utils/access_log');
+const { accessLog } = require('./utils/accessLog');
 
 const corsOptions = {
   origin: 'http://localhost:5173', // クライアントのオリジン
