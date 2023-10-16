@@ -17,6 +17,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
 const { admin_route, isAdmin } = require('../utils/admin_route');
+const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
@@ -158,11 +159,8 @@ router.post('/logout', async (req, res, next) => {
         401
       );
     }
-    // リフレッシュトークンの検証
-    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
-    logger.debug(decoded);
-    // emailを取得
-    const username = decoded.username;
+    // usernameを取得
+    const username = decodeItem(refreshToken, 'username', 'refresh')
     // リフレッシュトークンを削除
     await deleteRefreshToken(username);
     // Cookieを削除
