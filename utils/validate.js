@@ -101,6 +101,16 @@ const loginUser = async (username, password) => {
 
 exports.loginUser = loginUser;
 
+/**
+ * サインアップリクエストのパラメータを検証します。
+ * 
+ * @function
+ * @name validateSignupRequest
+ * @param {Object} params ユーザーパラメータ
+ * @param {string} params.username サインアップするユーザーのユーザー名
+ * @param {string} params.password サインアップするユーザーのパスワード
+ * @throws {MyCustomError} パラメータが無効な場合にカスタムエラーを投げます
+ */
 const validateSignupRequest = ({ username, password }) => {
   ValidationParams({ username, password }, ['username', 'password']);
   if (username === '') {
@@ -111,11 +121,22 @@ const validateSignupRequest = ({ username, password }) => {
 
 exports.validateSignupRequest = validateSignupRequest;
 
+/**
+ * 既存のユーザーを確認し、該当するユーザーが存在する場合は削除します。
+ * 
+ * @function
+ * @name checkExistingUser
+ * @async
+ * @param {string} username 検証するユーザー名
+ * @throws {MyCustomError} 有効なユーザーが既に存在する場合にカスタムエラーを投げます
+ * @returns {Promise<void>}
+ */
 const checkExistingUser = async (username) => {
   const user = await getUserAll(username);
   if (user && user.is_verify) {
     throw new MyCustomError('ExistUserError', 'email already exists', 400);
   } else if (user) {
+    // 未認証のユーザーは削除する
     await deleteUser(username);
   }
 };
