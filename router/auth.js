@@ -4,66 +4,47 @@ const {
   InvalidRefreshTokenError,
 } = require('../lib/CustomError');
 const {
-  ValidationPassword,
   ValidationParams,
   loginUser,
+  validateSignupRequest,
+  checkExistingUser,
+  registerUser,
 } = require('../utils/validate');
-const {
-  getUserAll,
-  insertRefreshToken,
-  getRefreshToken,
-  deleteRefreshToken,
-  insertUser,
-  deleteUser,
-  updateAccessNum,
-} = require('../controller/user');
+const { deleteRefreshToken } = require('../controller/user');
 const router = express.Router();
 
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { logger } = require('../lib/logger');
 const { admin_route, isAdmin } = require('../utils/adminRoute');
 const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
-const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
+const { SECRET_KEY } = process.env;
 
+/**
+ * 新しいユーザーをサインアップします。
+ *
+ * @function
+ * @async
+ * @name signUp
+ * @route {POST} /signup
+ * @middleware admin_route 管理者権限が必要
+ * @param {Request} req Expressのリクエストオブジェクト
+ * @param {Object} req.body リクエストのボディ
+ * @param {string} req.body.username サインアップするユーザーのユーザー名
+ * @param {string} req.body.password サインアップするユーザーのパスワード
+ * @param {Response} res Expressのレスポンスオブジェクト
+ * @param {function} next Expressのミドルウェア関数
+ * @returns {Response} 成功メッセージとHTTPステータス200を返します。
+ * @throws エラーが発生した場合は、エラーを次のミドルウェア関数に渡します。
+ */
 router.post('/signup', admin_route, async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    // パラメータのチェック
-    ValidationParams(req.body, ['username', 'password']);
-    // ValidationEmail(email);
-    if (username == '') {
-      throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-    }
-    ValidationPassword(password);
-    // logger.debug(email);
-    // userの存在確認
-    const user = await getUserAll(username);
-    if (!user) {
-      logger.debug(user);
-      logger.debug('user is not exist');
-    } else {
-      if (user.is_verify == true) {
-        throw new MyCustomError('ExistUserError', 'email already exists', 400);
-      } else {
-        // すでに未認証のユーザーが存在する場合は削除
-        await deleteUser(username);
-      }
-    }
 
-    // ユーザー情報をDBに保存
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = crypto.randomBytes(16).toString('hex'); // トークンの生成
-    const result = await insertUser(
-      username,
-      hashedPassword,
-      verificationToken,
-      true,
-      'user'
-    );
+    validateSignupRequest({ username, password });
+    await checkExistingUser(username);
+    await registerUser(username, password);
 
     res.status(200).json({ message: 'success' });
   } catch (error) {

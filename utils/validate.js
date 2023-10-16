@@ -157,12 +157,15 @@ const {
   getRefreshToken,
   deleteRefreshToken,
   updateAccessNum,
+  deleteUser,
+  insertUser,
 } = require('../controller/user');
 
 require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 // 仮置き
@@ -206,3 +209,40 @@ const loginUser = async (username, password) => {
 };
 
 exports.loginUser = loginUser;
+
+const validateSignupRequest = ({ username, password }) => {
+  ValidationParams({ username, password }, ['username', 'password']);
+  if (username === '') {
+    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
+  }
+  ValidationPassword(password);
+};
+
+exports.validateSignupRequest = validateSignupRequest;
+
+const checkExistingUser = async (username) => {
+  const user = await getUserAll(username);
+  if (user && user.is_verify) {
+    throw new MyCustomError('ExistUserError', 'email already exists', 400);
+  } else if (user) {
+    await deleteUser(username);
+  }
+};
+
+exports.checkExistingUser = checkExistingUser;
+
+// 仮置き
+// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
+const registerUser = async (username, password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const verificationToken = crypto.randomBytes(16).toString('hex');
+  return await insertUser(
+    username,
+    hashedPassword,
+    verificationToken,
+    true,
+    'user'
+  );
+};
+
+exports.registerUser = registerUser;
