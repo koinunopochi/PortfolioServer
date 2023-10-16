@@ -13,7 +13,7 @@ const { router: blogRouter } = require('./router/blog');
 const { router: contactRouter } = require('./router/contact');
 const { router: accessRouter } = require('./router/access');
 
-const { MyCustomError } = require('./utils/CustomError');
+const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/access_log');
 

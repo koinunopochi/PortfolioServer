@@ -1,5 +1,5 @@
 const { getUserAll } = require('../controller/user');
-const { MyCustomError } = require('./CustomError');
+const { MyCustomError } = require('../lib/CustomError');
 const { logger } = require('../lib/logger');
 const { decodeItem } = require('../lib/jwtHelper');
 

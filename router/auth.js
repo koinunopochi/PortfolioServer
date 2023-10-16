@@ -1,5 +1,5 @@
 const express = require('express');
-const { MyCustomError } = require('../utils/CustomError');
+const { MyCustomError } = require('../lib/CustomError');
 const { ValidationPassword, ValidationParams } = require('../utils/validate');
 const {
   getUserAll,
