@@ -43,11 +43,6 @@ exports.admin_route = protect;
 const isAdmin = async (req) => {
   try {
     const cookie = req.cookies.authToken;
-    // 認証トークンが存在しない場合はエラーを投げる
-    if (!cookie) {
-      throw new MyCustomError('InvalidUser', 'invalid user', 400);
-    }
-
     // トークンからユーザー名をデコードする
     const username = decodeItem(cookie, 'username');
 
