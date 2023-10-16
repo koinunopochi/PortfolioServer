@@ -1,5 +1,5 @@
 const express = require('express');
-const ValidationError = require('./CustomError').ValidationError;
+const ValidationError = require('../lib/CustomError').ValidationError;
 const { logger } = require('../lib/logger');
 const cookieParser = require('cookie-parser');
 // 認証回り
