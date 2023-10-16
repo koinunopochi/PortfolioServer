@@ -129,14 +129,13 @@ router.post('/login', async (req, res, next) => {
 
 router.post('/logout', async (req, res, next) => {
   try {
-    // logger.info('called /logout');
     const { refreshToken } = req.cookies;
-    // パラメータのチェック
-    ValidationParams(req.body, []);
     // リフレッシュトークンの存在確認
     if (!refreshToken) {
       throw new InvalidRefreshTokenError();
     }
+    // パラメータのチェック
+    ValidationParams(req.body, []);
     // usernameを取得
     const username = decodeItem(refreshToken, 'username', 'refresh');
     // リフレッシュトークンを削除
@@ -145,7 +144,6 @@ router.post('/logout', async (req, res, next) => {
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
     res.status(200).json({ message: 'success' });
-    logger.info('finish /logout');
   } catch (error) {
     next(error);
   }
