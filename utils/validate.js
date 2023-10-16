@@ -41,8 +41,6 @@ const ValidationParams = (params, allowedParams) => {
 };
 exports.ValidationParams = ValidationParams;
 
-
-
 const {
   getUserAll,
   insertRefreshToken,
@@ -59,15 +57,19 @@ const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 
-// 仮置き
-// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
-const loginUser = async (username, password) => {
+const validateLoginCredentials = ({ username, password }) => {
   ValidationParams({ username, password }, ['username', 'password']);
 
   if (username == '') {
     throw new MyCustomError('InvalidUsername', 'invalid username', 400);
   }
   ValidationPassword(password);
+};
+
+// 仮置き
+// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
+const loginUser = async (username, password) => {
+  validateLoginCredentials({ username, password });
 
   const user = await getUserAll(username);
 
@@ -103,7 +105,7 @@ exports.loginUser = loginUser;
 
 /**
  * サインアップリクエストのパラメータを検証します。
- * 
+ *
  * @function
  * @name validateSignupRequest
  * @param {Object} params ユーザーパラメータ
@@ -123,7 +125,7 @@ exports.validateSignupRequest = validateSignupRequest;
 
 /**
  * 既存のユーザーを確認し、該当するユーザーが存在する場合は削除します。
- * 
+ *
  * @function
  * @name checkExistingUser
  * @async
