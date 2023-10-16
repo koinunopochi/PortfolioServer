@@ -8,7 +8,6 @@ const {
   loginUser,
   validateSignupRequest,
   checkExistingUser,
-  registerUser,
 } = require('../utils/validate');
 const { deleteRefreshToken } = require('../controller/user');
 const router = express.Router();
@@ -20,6 +19,19 @@ const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
+
+
+const registerUser = async (username, password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const verificationToken = crypto.randomBytes(16).toString('hex');
+  return await insertUser(
+    username,
+    hashedPassword,
+    verificationToken,
+    true,
+    'user'
+  );
+};
 
 /**
  * 新しいユーザーをサインアップします。

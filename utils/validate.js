@@ -122,19 +122,3 @@ const checkExistingUser = async (username) => {
 };
 
 exports.checkExistingUser = checkExistingUser;
-
-// 仮置き
-// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
-const registerUser = async (username, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const verificationToken = crypto.randomBytes(16).toString('hex');
-  return await insertUser(
-    username,
-    hashedPassword,
-    verificationToken,
-    true,
-    'user'
-  );
-};
-
-exports.registerUser = registerUser;
