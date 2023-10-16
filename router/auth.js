@@ -127,6 +127,18 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+/**
+ * ユーザーのログアウトを処理するエンドポイント。
+ * 提供されたリフレッシュトークンを使用して、サーバー側で該当のトークンを無効化し、
+ * クライアントの認証トークンとリフレッシュトークンの両方のクッキーをクリアします。
+ * 
+ * @route POST /logout
+ * @param {Request} req - Expressのリクエストオブジェクト。
+ * @param {Response} res - Expressのレスポンスオブジェクト。
+ * @param {NextFunction} next - Expressのnext関数。
+ * @throws {InvalidRefreshTokenError} - 有効なリフレッシュトークンが提供されない場合にスローされるエラー。
+ * @returns {Object} 200 - ログアウトが正常に完了したことを示すレスポンス。
+ */
 router.post('/logout', async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
