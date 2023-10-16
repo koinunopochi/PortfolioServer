@@ -1,5 +1,5 @@
 const { insertAccessLog } = require('../controller/access_log');
-const { logger } = require('./logger');
+const { logger } = require('../lib/logger');
 
 const accessLog = async (req, res, next) => {
   try {

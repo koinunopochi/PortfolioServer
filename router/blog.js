@@ -8,7 +8,7 @@ const {
   getBlogOverviews,
   updateBlog,
 } = require('../controller/blog');
-const { logger } = require('../utils/logger');
+const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../utils/custom_error');
 const { admin_route } = require('../utils/admin_route');
 

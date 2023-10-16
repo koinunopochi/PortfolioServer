@@ -1,6 +1,6 @@
 const express = require('express');
 const ValidationError = require('./custom_error').ValidationError;
-const { logger } = require('./logger');
+const { logger } = require('../lib/logger');
 const cookieParser = require('cookie-parser');
 // 認証回り
 const ValidationEmail = (email) => {

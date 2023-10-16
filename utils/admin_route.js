@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { getUserAll } = require('../controller/user');
 const { MyCustomError } = require('./custom_error');
-const { logger } = require('./logger');
+const { logger } = require('../lib/logger');
 
 const protect = async (req, res, next) => {
   // jwtからusernameを取得する

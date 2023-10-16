@@ -15,7 +15,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { logger } = require('../utils/logger');
+const { logger } = require('../lib/logger');
 const { admin_route, isAdmin } = require('../utils/admin_route');
 
 require('dotenv').config();
