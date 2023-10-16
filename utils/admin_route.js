@@ -15,11 +15,6 @@ const { decodeItem } = require('./jwt');
  */
 const protect = async (req, res, next) => {
   try {
-    const cookie = req.cookies.authToken;
-    // 認証トークンが存在しない場合はエラーを投げる
-    if (!cookie) {
-      throw new MyCustomError('InvalidUser', 'invalid user', 400);
-    }
     // 管理者かどうかを確認する
     const is_admin = await isAdmin(req);
     // ユーザーが管理者でない場合はエラーを投げる
