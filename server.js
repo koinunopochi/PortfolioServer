@@ -17,6 +17,8 @@ const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
 
+const server_port = process.env.PORT || 3000;
+
 // TODO: 本番環境では、許可するオリジンを厳密に指定する
 const corsOptions = {
   origin: 'http://localhost:5173', // クライアントのオリジン
@@ -29,13 +31,12 @@ app.use(accessLog);
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const server_port = process.env.PORT || 3000;
-
+// router
 app.use('/auth', authRouter);
 app.use('/blog', blogRouter);
 app.use('/contact', contactRouter);
 app.use('/access', accessRouter);
-
+// not found
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
 });
