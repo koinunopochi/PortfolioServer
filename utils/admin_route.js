@@ -1,7 +1,7 @@
 const { getUserAll } = require('../controller/user');
 const { MyCustomError } = require('./custom_error');
 const { logger } = require('../lib/logger');
-const { decodeItem } = require('./jwt');
+const { decodeItem } = require('./tokenUtils');
 
 /**
  * 管理者のみがアクセスを許可されたルートを保護するためのミドルウェア。
