@@ -1,7 +1,7 @@
 const { getUserAll } = require('../controller/user');
 const { MyCustomError } = require('./custom_error');
 const { logger } = require('../lib/logger');
-const { decodeItem } = require('./jwtHelper');
+const { decodeItem } = require('../lib/jwtHelper');
 
 /**
  * 管理者のみがアクセスを許可されたルートを保護するためのミドルウェア。
@@ -65,4 +65,3 @@ const isAdmin = async (req) => {
   }
 };
 exports.isAdmin = isAdmin;
-
