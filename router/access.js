@@ -15,8 +15,8 @@ const { admin_route } = require('../utils/adminRoute');
  * レスポンスとして、指定された期間中のアクセスログのJSONを返します。
  *
  * @route {GET} /
- * @queryparam {string} start - ログを取得開始する日時（必須）
- * @queryparam {string} end - ログを取得終了する日時（オプショナル）
+ * @param {string} start - ログを取得開始する日時（必須）
+ * @param {string} end - ログを取得終了する日時（オプショナル）
  * @middleware {function} admin_route - 管理者のみアクセスを許可するミドルウェア
  * @throws {MyCustomError} - `start` パラメータが不在の場合、カスタムエラーをスロー
  */
