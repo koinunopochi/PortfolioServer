@@ -1,5 +1,23 @@
+const {
+  getUserAll,
+  getRefreshToken,
+  deleteRefreshToken,
+  deleteUser,
+} = require('../controller/user');
+
+const bcrypt = require('bcrypt');
+
 const ValidationError = require('../lib/CustomError').ValidationError;
 
+/**
+ * 入力されたパスワードが正しい形式であるかを検証します。
+ * パスワードは、小文字、大文字、数字、特殊文字をそれぞれ1文字以上含み、
+ * 全体として8〜128文字の長さである必要があります。
+ * 
+ * @param {string} password - 検証するパスワード
+ * @returns {boolean} パスワードが正しい形式である場合はtrue
+ * @throws {ValidationError} パスワードが未定義、または不正な形式の場合
+ */
 const ValidationPassword = (password) => {
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!-\/:-@\[-`{-~])[!-~]{8,128}$/;
@@ -12,7 +30,9 @@ const ValidationPassword = (password) => {
     throw new ValidationError('password is not correct');
   }
 };
+
 exports.ValidationPassword = ValidationPassword;
+
 
 /**
  * @function
@@ -41,23 +61,13 @@ const ValidationParams = (params, allowedParams) => {
 };
 exports.ValidationParams = ValidationParams;
 
-const {
-  getUserAll,
-  insertRefreshToken,
-  getRefreshToken,
-  deleteRefreshToken,
-  updateAccessNum,
-  deleteUser,
-} = require('../controller/user');
-
-require('dotenv').config();
-const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
-
-const bcrypt = require('bcrypt');
-const e = require('express');
-
-const jwt = require('jsonwebtoken');
-
+/**
+ * ログインの際の入力情報（ユーザ名とパスワード）を検証します。
+ * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
+ * @param {string} param0.username - ユーザ名
+ * @param {string} param0.password - パスワード
+ * @throws {MyCustomError} ユーザ名が無効の場合
+ */
 const validateLoginCredentials = ({ username, password }) => {
   ValidationParams({ username, password }, ['username', 'password']);
 
@@ -69,6 +79,11 @@ const validateLoginCredentials = ({ username, password }) => {
 
 exports.validateLoginCredentials = validateLoginCredentials;
 
+/**
+ * ユーザーが存在するかを検証します。
+ * @param {Object} user - 検証するユーザーオブジェクト
+ * @throws {MyCustomError} ユーザが存在しない場合
+ */
 const validateUserExistence = async (user) => {
   if (!user) {
     throw new MyCustomError('NotExistUser', 'not exist user', 400);
@@ -77,6 +92,12 @@ const validateUserExistence = async (user) => {
 
 exports.validateUserExistence = validateUserExistence;
 
+/**
+ * 入力されたパスワードと保存されているパスワードが一致するかを検証します。
+ * @param {string} inputPassword - 入力されたパスワード
+ * @param {string} storedPassword - 保存されているパスワード
+ * @throws {MyCustomError} パスワードが一致しない場合
+ */
 const validatePasswordMatch = async (inputPassword, storedPassword) => {
   const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
   if (!isPasswordValid) {
@@ -86,6 +107,11 @@ const validatePasswordMatch = async (inputPassword, storedPassword) => {
 
 exports.validatePasswordMatch = validatePasswordMatch;
 
+/**
+ * ユーザーが認証済みかを検証します。
+ * @param {Object} user - 検証するユーザーオブジェクト
+ * @throws {MyCustomError} ユーザーが認証されていない場合
+ */
 const ensureUserVerified = (user) => {
   if (!user.is_verify) {
     throw new MyCustomError('InvalidUser', 'invalid user', 400);
@@ -94,6 +120,10 @@ const ensureUserVerified = (user) => {
 
 exports.ensureUserVerified = ensureUserVerified;
 
+/**
+ * 既存のリフレッシュトークンが存在する場合、それを処理します。
+ * @param {string} username - リフレッシュトークンをチェックするユーザ名
+ */
 const handleExistingRefreshToken = async (username) => {
   const is_refresh_token = await getRefreshToken(username);
   if (is_refresh_token) {
@@ -102,36 +132,6 @@ const handleExistingRefreshToken = async (username) => {
 };
 
 exports.handleExistingRefreshToken = handleExistingRefreshToken;
-
-const generateTokens = (username) => {
-  const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
-    expiresIn: '7d',
-  });
-  return { token, refreshToken };
-};
-
-exports.generateTokens = generateTokens;
-
-// 仮置き
-// TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
-const loginUser = async (username, password) => {
-  validateLoginCredentials({ username, password });
-
-  const user = await getUserAll(username);
-  validateUserExistence(user);
-  validatePasswordMatch(password, user.password);
-  ensureUserVerified(user);
-  handleExistingRefreshToken(username);
-
-  const { token, refreshToken } = generateTokens(username);
-  await insertRefreshToken(username, refreshToken);
-  await updateAccessNum(username);
-
-  return { token, refreshToken };
-};
-
-exports.loginUser = loginUser;
 
 /**
  * サインアップリクエストのパラメータを検証します。
