@@ -54,6 +54,7 @@ require('dotenv').config();
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 const bcrypt = require('bcrypt');
+const e = require('express');
 
 const jwt = require('jsonwebtoken');
 
@@ -66,35 +67,64 @@ const validateLoginCredentials = ({ username, password }) => {
   ValidationPassword(password);
 };
 
+exports.validateLoginCredentials = validateLoginCredentials;
+
+const validateUserExistence = async (user) => {
+  if (!user) {
+    throw new MyCustomError('NotExistUser', 'not exist user', 400);
+  }
+};
+
+exports.validateUserExistence = validateUserExistence;
+
+const validatePasswordMatch = async (inputPassword, storedPassword) => {
+  const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
+  if (!isPasswordValid) {
+    throw new MyCustomError('InvalidPassword', 'invalid password', 400);
+  }
+};
+
+exports.validatePasswordMatch = validatePasswordMatch;
+
+const ensureUserVerified = (user) => {
+  if (!user.is_verify) {
+    throw new MyCustomError('InvalidUser', 'invalid user', 400);
+  }
+};
+
+exports.ensureUserVerified = ensureUserVerified;
+
+const handleExistingRefreshToken = async (username) => {
+  const is_refresh_token = await getRefreshToken(username);
+  if (is_refresh_token) {
+    await deleteRefreshToken(username);
+  }
+};
+
+exports.handleExistingRefreshToken = handleExistingRefreshToken;
+
+const generateTokens = (username) => {
+  const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
+    expiresIn: '7d',
+  });
+  return { token, refreshToken };
+};
+
+exports.generateTokens = generateTokens;
+
 // 仮置き
 // TODO：　ヴァリデーション以外のことも入ってしまっているため、分ける
 const loginUser = async (username, password) => {
   validateLoginCredentials({ username, password });
 
   const user = await getUserAll(username);
+  validateUserExistence(user);
+  validatePasswordMatch(password, user.password);
+  ensureUserVerified(user);
+  handleExistingRefreshToken(username);
 
-  if (!user) {
-    throw new MyCustomError('NotExistUser', 'not exist user', 400);
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new MyCustomError('InvalidPassword', 'invalid password', 400);
-  }
-  if (!user.is_verify) {
-    throw new MyCustomError('InvalidUser', 'invalid user', 400);
-  }
-
-  const is_refresh_token = await getRefreshToken(username);
-  if (is_refresh_token) {
-    await deleteRefreshToken(username);
-  }
-
-  const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ username }, REFRESH_SECRET_KEY, {
-    expiresIn: '7d',
-  });
-
+  const { token, refreshToken } = generateTokens(username);
   await insertRefreshToken(username, refreshToken);
   await updateAccessNum(username);
 
