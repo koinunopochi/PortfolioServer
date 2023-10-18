@@ -3,6 +3,9 @@ const { MyCustomError } = require('../lib/CustomError');
 const { logger } = require('../lib/logger');
 const { decodeItem } = require('../lib/jwtHelper');
 
+require('dotenv').config();
+const SECRET_KEY = process.env.SECRET_KEY;
+
 /**
  * 管理者のみがアクセスを許可されたルートを保護するためのミドルウェア。
  *
@@ -45,7 +48,7 @@ const isAdmin = async (req) => {
   try {
     const cookie = req.cookies.authToken;
     // トークンからユーザー名をデコードする
-    const username = decodeItem(cookie, 'username');
+    const username = decodeItem(cookie, 'username',SECRET_KEY);
 
     // ユーザー情報を取得
     const userInfo = await getUserAll(username);

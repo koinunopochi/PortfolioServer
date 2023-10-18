@@ -29,8 +29,10 @@ const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
+const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+
 
 /**
  * ユーザー名とパスワードを受け取り、ユーザーを登録します。
@@ -178,7 +180,7 @@ router.post('/logout', async (req, res, next) => {
     // パラメータのチェック
     ValidationParams(req.body, []);
     // usernameを取得
-    const username = decodeItem(refreshToken, 'username', 'refresh');
+    const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // リフレッシュトークンを削除
     await deleteRefreshToken(username);
     // Cookieを削除
@@ -210,7 +212,7 @@ router.post('/refresh', async (req, res, next) => {
     // パラメータのチェック
     ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
-    const username = decodeItem(refreshToken, 'username', 'refresh');
+    const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
       expiresIn: '15m',
