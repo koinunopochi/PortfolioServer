@@ -17,7 +17,7 @@ const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
 
-const server_port = process.env.PORT || 3000;
+const SERVER_PORT = process.env.PORT || 3000;
 
 // TODO: 本番環境では、許可するオリジンを厳密に指定する
 const corsOptions = {
@@ -94,8 +94,8 @@ mongo
     await mongo.init();
   })
   .then(() => {
-    app.listen(server_port, () => {
-      logger.info(`Server is listening on port ${server_port}`);
+    app.listen(SERVER_PORT, () => {
+      logger.info(`Server is listening on port ${SERVER_PORT}`);
     });
   })
   .catch((err) => {
