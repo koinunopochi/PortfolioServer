@@ -66,7 +66,7 @@ exports.getUserAll = getUserAll;
 const getUsernamesRoles = async () => {
   return await userOperations.find(
     {},
-    { projection: { username: 1, role: 1 } }
+    { projection: { username: 1, role: 1 ,_id:0} }
   );
 };
 exports.getUsernamesRoles = getUsernamesRoles;
