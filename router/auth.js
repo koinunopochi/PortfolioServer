@@ -47,7 +47,7 @@ const bcrypt = require('bcrypt');
  * @returns {Promise<object>} 登録したユーザーの情報
  * @throws 保存中のエラーが発生した場合
  */
-const registerUser = async (username, password) => {
+const registerUser = async (username, password,role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const verificationToken = crypto.randomBytes(16).toString('hex');
   return await insertUser(
@@ -55,9 +55,10 @@ const registerUser = async (username, password) => {
     hashedPassword,
     verificationToken,
     true,
-    'user'
+    role
   );
 };
+exports.registerUser = registerUser;
 
 /**
  * 新しいユーザーをサインアップします。
@@ -82,7 +83,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
 
     validateSignupRequest({ username, password });
     await checkExistingUser(username);
-    await registerUser(username, password);
+    await registerUser(username, password,'user');
 
     res.status(200).json({ message: 'success' });
   } catch (error) {
