@@ -60,6 +60,18 @@ const getUserAll = async (username) => {
 exports.getUserAll = getUserAll;
 
 /**
+ * すべてのusernameとroleを取得する関数
+ * @returns getで得た結果を返す
+ */
+const getUsernamesRoles = async () => {
+  return await userOperations.find(
+    {},
+    { projection: { username: 1, role: 1 } }
+  );
+};
+exports.getUsernamesRoles = getUsernamesRoles;
+
+/**
  * リフレッシュトークンの取得
  * @param {string} username
  * @returns 取得した結果を返す
