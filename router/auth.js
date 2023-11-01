@@ -200,6 +200,7 @@ router.post('/logout', async (req, res, next) => {
  */
 router.delete('/delete', admin_route, async (req, res, next) => {
   try {
+    // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
     const user = await getUserAll(username);
     validateUserExistence(user);
