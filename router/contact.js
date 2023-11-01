@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { logger } = require('../lib/logger');
 const { SendMail } = require('../lib/mail');
+const AUTH_USER_EMAIL = process.env.AUTH_USER_EMAIL;
 
 
 /**
@@ -91,7 +92,7 @@ router.post('/', async (req, res, next) => {
 
     // 管理者へのメール送信
     const adminMail = createAdminMailContents(prams);
-    await sendMailWrapper('okapi771205a@gmail.com', adminMail);
+    await sendMailWrapper(AUTH_USER_EMAIL, adminMail);
 
     // ユーザーへのメール送信
     const userMail = createUserMailContents(prams);
