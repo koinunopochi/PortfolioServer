@@ -20,6 +20,7 @@ const {
   insertRefreshToken,
   updateAccessNum,
   deleteUser,
+  getUsernamesRoles,
 } = require('../models/user');
 const router = express.Router();
 
@@ -271,8 +272,8 @@ router.get('/is-admin', async (req, res, next) => {
  */
 router.get('/user',admin_route ,async (req, res, next) => {
   try {
-    // userの情報を取得する処理
-    res.status(200).json({ users:[] });
+    const userInfo =await getUsernamesRoles();
+    res.status(200).json({ userInfo });
   } catch (error) {
     next(error);
   }
