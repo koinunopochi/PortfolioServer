@@ -34,7 +34,6 @@ const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
-
 /**
  * ユーザー名とパスワードを受け取り、ユーザーを登録します。
  *
@@ -49,7 +48,7 @@ const bcrypt = require('bcrypt');
  * @returns {Promise<object>} 登録したユーザーの情報
  * @throws 保存中のエラーが発生した場合
  */
-const registerUser = async (username, password,role) => {
+const registerUser = async (username, password, role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const verificationToken = crypto.randomBytes(16).toString('hex');
   return await insertUser(
@@ -85,7 +84,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
 
     validateSignupRequest({ username, password });
     await checkExistingUser(username);
-    await registerUser(username, password,'user');
+    await registerUser(username, password, 'user');
 
     res.status(200).json({ message: 'success' });
   } catch (error) {
@@ -126,7 +125,7 @@ const loginUser = async (username, password) => {
     await updateAccessNum(username);
 
     return { token, refreshToken };
-  } catch(error) {
+  } catch (error) {
     throw error;
   }
 };
@@ -198,7 +197,7 @@ router.post('/logout', async (req, res, next) => {
 /**
  * deleteアカウント
  */
-router.delete('/delete', async (req, res, next) => {
+router.delete('/delete', admin_route, async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await getUserAll(username);
