@@ -3,7 +3,7 @@ const {
   getRefreshToken,
   deleteRefreshToken,
   deleteUser,
-} = require('../controller/user');
+} = require('../models/user');
 
 const bcrypt = require('bcrypt');
 const { MyCustomError } = require('../lib/CustomError');

@@ -7,7 +7,7 @@ const {
   getBlog,
   getBlogOverviews,
   updateBlog,
-} = require('../controller/blog');
+} = require('../models/blog');
 const { logger } = require('../lib/logger');
 const { MyCustomError } = require('../lib/CustomError');
 const { admin_route } = require('../utils/adminRoute');

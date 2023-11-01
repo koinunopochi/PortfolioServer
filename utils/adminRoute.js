@@ -1,4 +1,4 @@
-const { getUserAll } = require('../controller/user');
+const { getUserAll } = require('../models/user');
 const { MyCustomError } = require('../lib/CustomError');
 const { logger } = require('../lib/logger');
 const { decodeItem } = require('../lib/jwtHelper');

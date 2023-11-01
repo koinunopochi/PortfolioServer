@@ -1,4 +1,4 @@
-const { insertAccessLog } = require('../controller/accessLog');
+const { insertAccessLog } = require('../models/accessLog');
 const { logger } = require('../lib/logger');
 
 /**

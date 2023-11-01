@@ -19,7 +19,7 @@ const {
   getUserAll,
   insertRefreshToken,
   updateAccessNum,
-} = require('../controller/user');
+} = require('../models/user');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
