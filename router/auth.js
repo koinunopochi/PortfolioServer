@@ -274,7 +274,7 @@ router.get('/is-admin', async (req, res, next) => {
 router.get('/user',admin_route ,async (req, res, next) => {
   try {
     const userInfo =await getUsernamesRoles();
-    res.status(200).json({ userInfo });
+    res.status(200).json(userInfo);
   } catch (error) {
     next(error);
   }
