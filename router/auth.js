@@ -44,6 +44,7 @@ const bcrypt = require('bcrypt');
  *
  * @param {string} username - 登録するユーザー名
  * @param {string} password - ユーザーの生のパスワード
+ * @param {string} role - ユーザーの権限
  * @returns {Promise<object>} 登録したユーザーの情報
  * @throws 保存中のエラーが発生した場合
  */
