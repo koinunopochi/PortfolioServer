@@ -8,7 +8,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const { router: authRouter } = require('./router/auth');
+const { router: authRouter, registerUser } = require('./router/auth');
 const { router: blogRouter } = require('./router/blog');
 const { router: contactRouter } = require('./router/contact');
 const { router: accessRouter } = require('./router/access');
@@ -16,6 +16,7 @@ const { router: accessRouter } = require('./router/access');
 const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
+const { getUserAll } = require('./models/user');
 
 const SERVER_PORT = process.env.PORT || 3000;
 
@@ -92,6 +93,15 @@ mongo
   .then(async () => {
     //初期化用のコード
     await mongo.init();
+  })
+  .then(async() => {
+    // adminの初期化
+    const AUTH_USER_NAME = process.env.AUTH_USER_NAME;
+    const AUTH_USER_PASSWORD = process.env.AUTH_USER_PASSWORD;
+    const user = await getUserAll(AUTH_USER_NAME);
+    if (!user) {
+      await registerUser(AUTH_USER_NAME, AUTH_USER_PASSWORD, 'admin');
+    }
   })
   .then(() => {
     app.listen(SERVER_PORT, () => {
