@@ -266,9 +266,17 @@ router.get('/is-admin', async (req, res, next) => {
     next(error);
   }
 });
-
-exports.router = router;
-
 /**
  * ユーザーの名前と権限をDBから取得します。
  */
+router.get('/user',admin_route ,async (req, res, next) => {
+  try {
+    // userの情報を取得する処理
+    res.status(200).json({ users:[] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+exports.router = router;
+
