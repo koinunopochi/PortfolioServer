@@ -79,11 +79,11 @@ app.use((err, req, res, next) => {
   } else {
     // 想定外のエラーを処理
     logger.error(err);
-    logger.info('finish error handling');
     error_json.error.name = 'ServerError';
     error_json.error.code = 500;
     error_json.error.message = '500 Server Error';
     res.status(500).send(error_json);
+    logger.info('finish error handling');
   }
 });
 
