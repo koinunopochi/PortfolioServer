@@ -19,6 +19,7 @@ const {
   getUserAll,
   insertRefreshToken,
   updateAccessNum,
+  deleteUser,
 } = require('../models/user');
 const router = express.Router();
 
@@ -188,6 +189,23 @@ router.post('/logout', async (req, res, next) => {
     // Cookieを削除
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
+    res.status(200).json({ message: 'success' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * deleteアカウント
+ */
+router.delete('/delete', async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    const user = await getUserAll(username);
+    validateUserExistence(user);
+    await validatePasswordMatch(password, user.password);
+    await deleteRefreshToken(username);
+    await deleteUser(username);
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
