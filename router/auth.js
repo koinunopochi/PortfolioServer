@@ -61,7 +61,7 @@ const registerUser = async (username, password) => {
 
 /**
  * 新しいユーザーをサインアップします。
- *
+ *将来的に、メール認証を追加しようと思うため、認証に関する項目が存在する
  * @function
  * @async
  * @name signUp
