@@ -199,10 +199,9 @@ router.post('/logout', async (req, res, next) => {
  */
 router.delete('/delete', admin_route, async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { username } = req.body;
     const user = await getUserAll(username);
     validateUserExistence(user);
-    await validatePasswordMatch(password, user.password);
     await deleteRefreshToken(username);
     await deleteUser(username);
     res.status(200).json({ message: 'success' });
@@ -269,3 +268,7 @@ router.get('/is-admin', async (req, res, next) => {
 });
 
 exports.router = router;
+
+/**
+ * ユーザーの名前と権限をDBから取得します。
+ */
