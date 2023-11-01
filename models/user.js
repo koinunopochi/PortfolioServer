@@ -64,6 +64,7 @@ exports.getUserAll = getUserAll;
  * @returns getで得た結果を返す
  */
 const getUsernamesRoles = async () => {
+  // usernameが一意の値であるため、_idは取得しない
   return await userOperations.find(
     {},
     { projection: { username: 1, role: 1 ,_id:0} }
