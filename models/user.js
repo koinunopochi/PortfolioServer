@@ -3,7 +3,7 @@ const { logger } = require('../lib/logger');
 const DbOperations = require('../lib/DbOperations');
 
 const userOperations = new DbOperations('users');
-const refreshTokenOperations = new DbOperations('refresh_tokens');
+// const refreshTokenOperations = new DbOperations('refresh_tokens');
 
 // ###################  insert周り  ################################
 /**
@@ -31,19 +31,19 @@ const insertUser = async (
   });
 };
 exports.insertUser = insertUser;
-/**
- * 指定したユーザーにリフレッシュトークンを付与する関数
- * @param {string} username ユーザー名
- * @param {string} refresh_token リフレッシュ用のトークン
- * @returns insert結果を返す
- */
-const insertRefreshToken = async (username, refresh_token) => {
-  return await refreshTokenOperations.insert({
-    username,
-    refresh_token,
-  });
-};
-exports.insertRefreshToken = insertRefreshToken;
+// /**
+//  * 指定したユーザーにリフレッシュトークンを付与する関数
+//  * @param {string} username ユーザー名
+//  * @param {string} refresh_token リフレッシュ用のトークン
+//  * @returns insert結果を返す
+//  */
+// const insertRefreshToken = async (username, refresh_token) => {
+//   return await refreshTokenOperations.insert({
+//     username,
+//     refresh_token,
+//   });
+// };
+// exports.insertRefreshToken = insertRefreshToken;
 
 // ###################  get周り  ################################
 
@@ -67,37 +67,37 @@ const getUsernamesRoles = async () => {
   // usernameが一意の値であるため、_idは取得しない
   return await userOperations.find(
     {},
-    { projection: { username: 1, role: 1 ,_id:0} }
+    { projection: { username: 1, role: 1, _id: 0 } }
   );
 };
 exports.getUsernamesRoles = getUsernamesRoles;
 
-/**
- * リフレッシュトークンの取得
- * @param {string} username
- * @returns 取得した結果を返す
- */
-const getRefreshToken = async (username) => {
-  return await refreshTokenOperations.findOne(
-    { username },
-    {
-      _id: 0,
-      refresh_token: 1,
-    }
-  );
-};
-exports.getRefreshToken = getRefreshToken;
+// /**
+//  * リフレッシュトークンの取得
+//  * @param {string} username
+//  * @returns 取得した結果を返す
+//  */
+// const getRefreshToken = async (username) => {
+//   return await refreshTokenOperations.findOne(
+//     { username },
+//     {
+//       _id: 0,
+//       refresh_token: 1,
+//     }
+//   );
+// };
+// exports.getRefreshToken = getRefreshToken;
 
 // ###################  delete周り  ################################
-/**
- * リフレッシュトークンの削除
- * @param {string} username
- * @returns 結果を返す
- */
-const deleteRefreshToken = async (username) => {
-  return await refreshTokenOperations.delete({ username });
-};
-exports.deleteRefreshToken = deleteRefreshToken;
+// /**
+//  * リフレッシュトークンの削除
+//  * @param {string} username
+//  * @returns 結果を返す
+//  */
+// const deleteRefreshToken = async (username) => {
+//   return await refreshTokenOperations.delete({ username });
+// };
+// exports.deleteRefreshToken = deleteRefreshToken;
 
 /**
  * ユーザーの削除を行う
