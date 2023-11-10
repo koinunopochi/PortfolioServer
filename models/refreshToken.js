@@ -1,8 +1,14 @@
 // const { logger } = require('../lib/logger');
-
+const { logger } = require('../lib/logger');
+const { getDb } = require('../lib/mongo');
 const DbOperations = require('../lib/DbOperations');
 
-const refreshTokenOperations = new DbOperations('refresh_tokens');
+let refreshTokenOperations;
+getDb().then((db) => {
+  refreshTokenOperations = new DbOperations(db, 'refresh_tokens');
+  logger.info('MongoDB create new [refresh_tokens] instance');
+});
+// const refreshTokenOperations = new DbOperations('refresh_tokens');
 
 /**
  * 指定したユーザーにリフレッシュトークンを付与する関数
@@ -17,7 +23,6 @@ const insertRefreshToken = async (username, refresh_token) => {
   });
 };
 exports.insertRefreshToken = insertRefreshToken;
-
 
 /**
  * リフレッシュトークンの取得
@@ -34,7 +39,6 @@ const getRefreshToken = async (username) => {
   );
 };
 exports.getRefreshToken = getRefreshToken;
-
 
 /**
  * リフレッシュトークンの削除
