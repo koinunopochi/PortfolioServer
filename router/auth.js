@@ -14,14 +14,14 @@ const {
   handleExistingRefreshToken,
 } = require('../utils/validate');
 const {
-  deleteRefreshToken,
   insertUser,
   getUserAll,
-  insertRefreshToken,
   updateAccessNum,
   deleteUser,
   getUsernamesRoles,
 } = require('../models/user');
+const { deleteRefreshToken } = require('../models/refreshToken');
+const { insertRefreshToken } = require('../models/refreshToken');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
@@ -271,9 +271,9 @@ router.get('/is-admin', async (req, res, next) => {
 /**
  * ユーザーの名前と権限をDBから取得します。
  */
-router.get('/user',admin_route ,async (req, res, next) => {
+router.get('/user', admin_route, async (req, res, next) => {
   try {
-    const userInfo =await getUsernamesRoles();
+    const userInfo = await getUsernamesRoles();
     res.status(200).json(userInfo);
   } catch (error) {
     next(error);
@@ -281,4 +281,3 @@ router.get('/user',admin_route ,async (req, res, next) => {
 });
 
 exports.router = router;
-
