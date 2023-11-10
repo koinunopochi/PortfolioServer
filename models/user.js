@@ -1,8 +1,14 @@
 const { logger } = require('../lib/logger');
 
 const DbOperations = require('../lib/DbOperations');
+const { getDb } = require('../lib/mongo');
 
-const userOperations = new DbOperations('users');
+let userOperations;
+getDb().then((db) => {
+  userOperations = new DbOperations(db, 'users');
+  logger.info("MongoDB create new [users] instance")
+});
+// const userOperations = new DbOperations('users');
 // const refreshTokenOperations = new DbOperations('refresh_tokens');
 
 // ###################  insert周り  ################################
