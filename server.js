@@ -85,8 +85,11 @@ app.use((err, req, res, next) => {
     error_json.error.message = '500 Server Error';
     res.status(500).send(error_json);
 
+    // eエラーネームとスタックトレースを保持
+    const errObj = err.name+'\n'+err.stack;
+    console.log(errObj);
     // エラー通知メール送信
-    sendingMail(err);
+    sendingMail(errObj);
 
     logger.info('finish irregularError handling');
   }
@@ -95,7 +98,7 @@ app.use((err, req, res, next) => {
 const sendingMail = async (error) => {
   try {
     const subject = '【至急対応】５００エラーが発生しました。';
-    const content = `発生時間：${new Date().toLocaleString()}\nエラー内容：${error}`;
+    const content = `発生時間：${new Date()}\nエラー内容：${error}`;
     const getter = process.env.AUTH_USER_EMAIL;
     await SendMail(getter, subject, content);
     return true;
