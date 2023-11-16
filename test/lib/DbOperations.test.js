@@ -1,77 +1,66 @@
-const { MongoClient } = require('mongodb');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const DbOperations = require('../../lib/DbOperations'); // 必要に応じてパスを修正してください。
+const DbOperations = require('./../../lib/DbOperations');
 
-let mongoServer;
-let mongoClient;
-const testCollectionName = 'testCollection';
+// MongoDBのモック
+const mockCollection = {
+  insertOne: jest.fn().mockResolvedValue({ insertedId: '12345' }), // insertOneが成功時の値を返すようにモック
+  find: jest.fn().mockReturnThis(), // findがメソッドチェーンをサポートするように
+  toArray: jest.fn().mockResolvedValue([]), // toArrayが空の配列を返すようにモック
+  findOne: jest.fn().mockResolvedValue({}), // findOneがオブジェクトを返すようにモック
+  updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }), // updateOneが成功時の値を返すようにモック
+  deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }), // deleteOneが成功時の値を返すようにモック
+};
+const mockDb = {
+  collection: jest.fn().mockImplementation(() => mockCollection),
+};
 
-beforeAll(async () => {
-  process.env.NODE_ENV = 'test';
-  mongoServer = new MongoMemoryServer();
-  await mongoServer.start();
-  const mongoUri = await mongoServer.getUri();
-  mongoClient = await MongoClient.connect(mongoUri);
-});
+describe('DbOperations', () => {
+  let dbOps;
 
-afterAll(async () => {
-  await mongoClient.close();
-  await mongoServer.stop();
-  process.env.NODE_ENV = undefined;
-});
-
-describe('DbOperationsクラス', () => {
-  // テスト用のDbOperationsインスタンスを作成
-  const dbOperations = new DbOperations(testCollectionName);
-
-  it('ドキュメントを挿入する', async () => {
-    // テストデータの作成
-    const data = { name: 'John Doe', age: 30 };
-    // ドキュメントの挿入
-    const result = await dbOperations.insert(data);
-    // 挿入されたドキュメントの数を検証
-    expect(result.insertedCount).toBe(1);
+  beforeEach(() => {
+    dbOps = new DbOperations(mockDb, 'testCollection');
+    jest.clearAllMocks();
   });
 
-  it('ドキュメントを検索する', async () => {
-    const criteria = { name: 'John Doe' };
-    // ドキュメントの検索
-    const results = await dbOperations.find(criteria);
-    // 返されたドキュメントの数と内容を検証
-    expect(results).toHaveLength(1);
-    expect(results[0].name).toBe('John Doe');
+  test('insert - should insert a document', async () => {
+    const testData = { name: 'test' };
+    await dbOps.insert(testData);
+    expect(mockCollection.insertOne).toHaveBeenCalledWith(testData);
   });
 
-  it('単一のドキュメントを検索する', async () => {
-    const criteria = { name: 'John Doe' };
-    // ドキュメントの検索
-    const result = await dbOperations.findOne(criteria);
-    // 返されたドキュメントの内容を検証
-    expect(result.name).toBe('John Doe');
+  test('find - should find documents based on criteria', async () => {
+    const testCriteria = { name: 'test' };
+    const testProjection = {};
+    await dbOps.find(testCriteria, testProjection);
+    expect(mockCollection.find).toHaveBeenCalledWith(
+      testCriteria,
+      testProjection
+    );
+    expect(mockCollection.toArray).toHaveBeenCalled();
   });
 
-  it('ドキュメントを更新する', async () => {
-    const criteria = { name: 'John Doe' };
-    const updateData = { $set: { age: 31 } };
-    // ドキュメントの更新
-    const result = await dbOperations.update(criteria, updateData);
-    // 更新されたドキュメントの数を検証
-    expect(result.modifiedCount).toBe(1);
-
-    // 更新後のドキュメントを確認
-    const updatedDocument = await dbOperations.findOne(criteria);
-    expect(updatedDocument.age).toBe(31);
+  test('findOne - should find a single document based on criteria', async () => {
+    const testCriteria = { name: 'test' };
+    const testProjection = {};
+    await dbOps.findOne(testCriteria, testProjection);
+    expect(mockCollection.findOne).toHaveBeenCalledWith(
+      testCriteria,
+      testProjection
+    );
   });
 
-  it('ドキュメントを削除する', async () => {
-    const criteria = { name: 'John Doe' };
-    // ドキュメントの削除
-    const result = await dbOperations.delete(criteria);
-    // 削除されたドキュメントの数を検証
-    expect(result.deletedCount).toBe(1);
+  test('update - should update a document', async () => {
+    const testCriteria = { name: 'test' };
+    const testData = { $set: { name: 'updated' } };
+    await dbOps.update(testCriteria, testData);
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      testCriteria,
+      testData
+    );
+  });
 
-    // 削除後、ドキュメントが存在しないことを検証
-    const deletedDocument = await dbOperations.findOne(criteria);
-    expect(deletedDocument).toBeNull();
+  test('delete - should delete a document', async () => {
+    const testCriteria = { name: 'test' };
+    await dbOps.delete(testCriteria);
+    expect(mockCollection.deleteOne).toHaveBeenCalledWith(testCriteria);
   });
 });

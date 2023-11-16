@@ -6,6 +6,10 @@ const { decodeItem } = require('../lib/jwtHelper');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
+// 環境固有の .env ファイルの読み込み
+const envPath = `.env.${process.env.NODE_ENV}`;
+require('dotenv').config({ path: envPath });
+
 /**
  * 管理者のみがアクセスを許可されたルートを保護するためのミドルウェア。
  *

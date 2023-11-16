@@ -1,6 +1,13 @@
+const { logger } = require('../lib/logger');
 const DbOperations = require('../lib/DbOperations');
+const { getDb } = require('../lib/mongo');
 
-const accessCollection = new DbOperations('access_logs');
+let accessCollection;
+getDb().then((db) => {
+  accessCollection = new DbOperations(db, 'access_logs');
+  logger.info('MongoDB create new [access_logs] instance');
+});
+// const accessCollection = new DbOperations('access_logs');
 
 /**
  * アクセスされたログをDBに保存する

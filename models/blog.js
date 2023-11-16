@@ -1,7 +1,14 @@
+const { logger } = require('../lib/logger');
 const { ObjectId } = require('mongodb');
+const { getDb } = require('../lib/mongo');
 const DbOperations = require('../lib/DbOperations');
 
-const blogsCollection = new DbOperations('blogs');
+let blogsCollection;
+getDb().then((db) => {
+  blogsCollection = new DbOperations(db, 'blogs');
+  logger.info('MongoDB create new [blogs] instance');
+});
+// const blogsCollection = new DbOperations('blogs');
 
 /**
  * blogを挿入する

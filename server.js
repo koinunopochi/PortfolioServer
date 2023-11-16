@@ -89,7 +89,9 @@ app.use((err, req, res, next) => {
 });
 
 mongo
-  .connect()
+  .connect().then(
+    logger.info("MongoDB connect success!!!")
+  )
   .then(async () => {
     //初期化用のコード
     await mongo.init();

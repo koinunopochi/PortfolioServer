@@ -1,9 +1,8 @@
+const { getUserAll, deleteUser } = require('../models/user');
 const {
-  getUserAll,
   getRefreshToken,
   deleteRefreshToken,
-  deleteUser,
-} = require('../models/user');
+} = require('../models/refreshToken');
 
 const bcrypt = require('bcrypt');
 const { MyCustomError } = require('../lib/CustomError');
