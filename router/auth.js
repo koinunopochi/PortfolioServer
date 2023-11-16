@@ -32,6 +32,12 @@ const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
+
+// 環境固有の .env ファイルの読み込み
+const envPath = `.env.${process.env.NODE_ENV}`;
+require('dotenv').config({ path: envPath });
+const COOKIE_SETTINGS = JSON.parse(process.env.COOKIE_SETTINGS);
+
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
@@ -146,15 +152,9 @@ router.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
     const { token, refreshToken } = await loginUser(username, password);
     // クッキーにトークンを保存
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: false,
-    });
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: false,
-    });
-
+    res.cookie('refreshToken', refreshToken, COOKIE_SETTINGS);
+    res.cookie('authToken', token, COOKIE_SETTINGS);
+    
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
@@ -238,7 +238,7 @@ router.post('/refresh', async (req, res, next) => {
       expiresIn: '15m',
     });
     // クッキーにトークンを保存
-    res.cookie('authToken', token, { httpOnly: true });
+    res.cookie('authToken', token, COOKIE_SETTINGS);
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
