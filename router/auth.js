@@ -32,6 +32,7 @@ const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
+const AUTH_TOKEN_TIME = process.env.AUTH_TOKEN_TIME;
 
 // 環境固有の .env ファイルの読み込み
 const envPath = `.env.${process.env.NODE_ENV}`;
@@ -235,7 +236,7 @@ router.post('/refresh', async (req, res, next) => {
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
-      expiresIn: '15m',
+      expiresIn: AUTH_TOKEN_TIME,
     });
     // クッキーにトークンを保存
     res.cookie('authToken', token, COOKIE_SETTINGS);
