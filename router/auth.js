@@ -229,7 +229,6 @@ router.post('/refresh', async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     hasParam(refreshToken, 'refreshToken');
-    // パラメータのチェック
     ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
