@@ -15,7 +15,7 @@ const {
 } = require('../utils/validate');
 const {
   insertUser,
-  getUserAll,
+  findAllUserData,
   updateAccessNum,
   deleteUser,
   getUsernamesRoles,
@@ -122,7 +122,7 @@ const loginUser = async (username, password) => {
   try {
     validateLoginCredentials({ username, password });
 
-    const user = await getUserAll({username});
+    const user = await findAllUserData({ username });
     validateUserExistence(user);
     await validatePasswordMatch(password, user.password);
     ensureUserVerified(user);
@@ -203,7 +203,7 @@ router.delete('/delete', admin_route, async (req, res, next) => {
   try {
     // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
-    const user = await getUserAll({username});
+    const user = await findAllUserData({ username });
     validateUserExistence(user);
     await deleteRefreshToken({username});
     await deleteUser({username});

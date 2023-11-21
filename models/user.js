@@ -41,16 +41,16 @@ exports.insertUser = insertUser;
 // ###################  get周り  ################################
 
 /**
- * ユーザーに関する情報をすべて取得する関数
+ * ユーザーに関する情報をユーザー名に基づいて検索する関数
  * @param {string} username ユーザー名
- * @returns getで得た結果を返す
+ * @returns 検索で得た結果を返す
  */
-const getUserAll = async ({ username }) => {
+const findAllUserData = async ({ username }) => {
   const result = await userOperations.findOne({ username });
   logger.debug(result);
   return result;
 };
-exports.getUserAll = getUserAll;
+exports.findAllUserData = findAllUserData;
 
 /**
  * すべてのusernameとroleを取得する関数

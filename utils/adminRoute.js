@@ -1,4 +1,4 @@
-const { getUserAll } = require('../models/user');
+const { findAllUserData } = require('../models/user');
 const { MyCustomError } = require('../lib/CustomError');
 const { logger } = require('../lib/logger');
 const { decodeItem } = require('../lib/jwtHelper');
@@ -55,7 +55,7 @@ const isAdmin = async (req) => {
     const username = decodeItem(cookie, 'username',SECRET_KEY);
 
     // ユーザー情報を取得
-    const userInfo = await getUserAll({username});
+    const userInfo = await findAllUserData({ username });
     logger.debug(userInfo.role);
 
     // ユーザーが管理者であればtrueを返す

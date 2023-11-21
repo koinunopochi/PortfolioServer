@@ -16,7 +16,7 @@ const { router: accessRouter } = require('./router/access');
 const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
-const { getUserAll } = require('./models/user');
+const { findAllUserData } = require('./models/user');
 const { SendMail } = require('./lib/mail');
 
 const SERVER_PORT = process.env.PORT || 3000;
@@ -117,7 +117,7 @@ mongo
     // adminの初期化
     const AUTH_USER_NAME = process.env.AUTH_USER_NAME;
     const AUTH_USER_PASSWORD = process.env.AUTH_USER_PASSWORD;
-    const user = await getUserAll({username:AUTH_USER_NAME});
+    const user = await findAllUserData({ username: AUTH_USER_NAME });
     if (!user) {
       await registerUser(AUTH_USER_NAME, AUTH_USER_PASSWORD, 'admin');
     }

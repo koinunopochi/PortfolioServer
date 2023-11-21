@@ -1,4 +1,4 @@
-const { getUserAll, deleteUser } = require('../models/user');
+const { findAllUserData, deleteUser } = require('../models/user');
 const {
   getRefreshToken,
   deleteRefreshToken,
@@ -163,7 +163,7 @@ exports.validateSignupRequest = validateSignupRequest;
  * @returns {Promise<void>}
  */
 const checkExistingUser = async (username) => {
-  const user = await getUserAll({ username });
+  const user = await findAllUserData({ username });
   if (user && user.is_verify) {
     throw new MyCustomError('ExistUserError', 'email already exists', 400);
   } else if (user) {
