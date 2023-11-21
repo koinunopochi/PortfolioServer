@@ -22,7 +22,7 @@ getDb().then((db) => {
  * @param {Date} update_date 更新日
  * @returns
  */
-const insertBlog = async (
+const insertBlog = async ({
   title,
   content,
   overview,
@@ -30,8 +30,8 @@ const insertBlog = async (
   tags,
   role,
   date,
-  update_date
-) => {
+  update_date,
+}) => {
   const date_ = date || new Date();
   const update_date_ = update_date || new Date();
   return await blogsCollection.insert({
@@ -56,15 +56,15 @@ const insertBlog = async (
  * @param {string} role
  * @returns
  */
-const updateBlog = async (
+const updateBlog = async ({
   id,
   title,
   content,
   overview,
   category,
   tags,
-  role
-) => {
+  role,
+}) => {
   return await blogsCollection.update(
     { _id: new ObjectId(id) },
     {
@@ -135,12 +135,12 @@ exports.getBlogOverviewsIgnoreDraft = getBlogOverviewsIgnoreDraft;
  * @param {string} id  blog id
  * @returns
  */
-const getBlog = async (id) => {
+const getBlog = async ({id}) => {
   return await blogsCollection.findOne({ _id: new ObjectId(id) });
 };
 
 // 現在未使用
-const getBlogIgnoreDraft = async (id) => {
+const getBlogIgnoreDraft = async ({id}) => {
   return await blogsCollection.findOne({
     _id: new ObjectId(id),
     role: { $ne: 'draft' },
@@ -153,7 +153,7 @@ exports.getBlogIgnoreDraft = getBlogIgnoreDraft;
  * @param {string} id blog id
  * @returns {boolean} 削除に成功した場合はtrue
  */
-const deleteBlog = async (id) => {
+const deleteBlog = async ({id}) => {
   const result = await blogsCollection.delete({ _id: new ObjectId(id) });
   return result.deletedCount === 1;
 };
