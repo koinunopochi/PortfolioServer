@@ -61,9 +61,9 @@ const registerUser = async (username, password, role) => {
   const verificationToken = crypto.randomBytes(16).toString('hex');
   return await insertUser({
     username,
-    hashed_password:hashedPassword,
+    hashedPassword,
     verificationToken,
-    is_verify: true,
+    isVerify: true,
     role,
   });
 };

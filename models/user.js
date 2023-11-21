@@ -15,24 +15,24 @@ getDb().then((db) => {
 /**
  * ユーザー登録のための関数
  * @param {string} username ユーザー名
- * @param {string} hashed_password ハッシュ化されたパスワード
+ * @param {string} hashedPassword ハッシュ化されたパスワード
  * @param {string} token メール認証用のトークン
- * @param {boolean} is_verify メール認証が終わっているかどうか
+ * @param {boolean} isVerify メール認証が終わっているかどうか
  * @param {string} role adminかuserか
  * @returns insertした結果を表示
  */
 const insertUser = async ({
   username,
-  hashed_password,
+  hashedPassword,
   token,
-  is_verify,
+  isVerify,
   role,
 }) => {
   return await userOperations.insert({
     username,
-    password: hashed_password,
+    password: hashedPassword,
     token,
-    is_verify,
+    isVerify,
     role,
   });
 };
