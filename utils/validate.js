@@ -168,8 +168,20 @@ const checkExistingUser = async (username) => {
     throw new MyCustomError('ExistUserError', 'email already exists', 400);
   } else if (user) {
     // 未認証のユーザーは削除する
-    await deleteUser({username});
+    await deleteUser({ username });
   }
 };
 
 exports.checkExistingUser = checkExistingUser;
+
+/**
+ * 指定されたパラメータに値がない場合に、parmNameの値は必須であるというエラーを投げる
+ * @param {*} param チェックしたい値
+ * @param {string} paramName エラー時に出力する変数名
+ */
+const hasParam = (param, paramName) => {
+  if (!param)
+    throw new MyCustomError('InvalidParameter', `${paramName}の値は必須です。`);
+};
+
+exports.hasParam = hasParam;
