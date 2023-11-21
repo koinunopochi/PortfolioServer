@@ -19,7 +19,7 @@ getDb().then((db) => {
  * @param {string} tags タグ
  * @param {string} role
  * @param {Date} date 最初の投稿日
- * @param {Date} update_date 更新日
+ * @param {Date} updateDate 更新日
  * @returns
  */
 const insertBlog = async ({
@@ -30,10 +30,10 @@ const insertBlog = async ({
   tags,
   role,
   date,
-  update_date,
+  updateDate,
 }) => {
   const date_ = date || new Date();
-  const update_date_ = update_date || new Date();
+  const update_date = updateDate || new Date();
   return await blogsCollection.insert({
     title,
     content,
@@ -42,7 +42,7 @@ const insertBlog = async ({
     tags,
     role,
     date: date_,
-    update_date: update_date_,
+    update_date,
   });
 };
 /**
