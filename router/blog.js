@@ -16,7 +16,7 @@ const { admin_route } = require('../utils/adminRoute');
 
 /**
  * すべてのブログの概要を取得するエンドポイント。
- * 
+ *
  * @route GET /overviews
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} res - Expressのレスポンスオブジェクト。
@@ -33,10 +33,9 @@ router.get('/overviews', async (req, res, next) => {
   }
 });
 
-
 /**
  * 指定したIDのブログの情報を取得するエンドポイント。
- * 
+ *
  * @route GET /:blogId
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} res - Expressのレスポンスオブジェクト。
@@ -46,7 +45,7 @@ router.get('/overviews', async (req, res, next) => {
  */
 router.get('/:blogId', async (req, res, next) => {
   try {
-    const blog = await getBlog(req.params.blogId);
+    const blog = await getBlog({id:req.params.blogId});
     if (blog) {
       res.json(blog);
     } else {
@@ -61,19 +60,18 @@ router.get('/:blogId', async (req, res, next) => {
   }
 });
 
-
 /**
  * すべてのブログの情報を取得するエンドポイント。
  * 注意: 実際の運用においては、すべての情報を取得するのではなく、概要だけを取得すべきである。
  * しかし、現在のフロントエンドプロジェクトのインデックス部分で誤ってこのエンドポイントを使用しているため、
  * その部分の修正が必要です。
- * 
+ *
  * @route GET /
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} res - Expressのレスポンスオブジェクト。
  * @param {function} next - Expressのミドルウェア関数。
  * @returns {Array<Object>} JSON - 取得したすべてのブログの情報。
- * 
+ *
  * TODO: フロントエンドプロジェクトのインデックス部分での使用を修正する。
  */
 router.get('/', async (req, res, next) => {
@@ -86,13 +84,12 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-
 // 認証ルート　＆＆　バリデーションは自身しか使わないため、不要
 router.use(admin_route);
 
 /**
  * 新しいブログを作成するエンドポイント。
- * 
+ *
  * @route POST /
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} req.body - リクエストボディ。
@@ -108,13 +105,13 @@ router.use(admin_route);
 router.post('/', async (req, res, next) => {
   try {
     const { title, content, overview, category, tags } = req.body;
-    const savedBlog = await insertBlog(
+    const savedBlog = await insertBlog({
       title,
       content,
       overview,
       category,
-      tags
-    );
+      tags,
+    });
     logger.debug(savedBlog);
     logger.info('id:' + savedBlog.insertedId);
     res.json({
@@ -127,10 +124,9 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-
 /**
  * 指定されたIDのブログを更新するエンドポイント。
- * 
+ *
  * @route PUT /:blogId
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} req.params - ルートのパラメータ。
@@ -149,14 +145,14 @@ router.put('/:blogId', async (req, res, next) => {
   try {
     const { title, content, overview, category, tags } = req.body;
     const id = req.params.blogId;
-    const savedBlog = await updateBlog(
+    const savedBlog = await updateBlog({
       id,
       title,
       content,
       overview,
       category,
-      tags
-    );
+      tags,
+    });
     logger.debug(savedBlog);
     logger.info('id:' + savedBlog.insertedId);
     res.json({
@@ -169,10 +165,9 @@ router.put('/:blogId', async (req, res, next) => {
   }
 });
 
-
 /**
  * 指定されたIDのブログを削除するエンドポイント。
- * 
+ *
  * @route DELETE /:blogId
  * @param {Object} req - Expressのリクエストオブジェクト。
  * @param {Object} req.params - ルートのパラメータ。
@@ -183,7 +178,7 @@ router.put('/:blogId', async (req, res, next) => {
  */
 router.delete('/:blogId', async (req, res, next) => {
   try {
-    const isDeleted = await deleteBlog(req.params.blogId);
+    const isDeleted = await deleteBlog({id:req.params.blogId});
     logger.debug(isDeleted);
     if (isDeleted) {
       logger.info('deleted blog' + req.params.blogId);
@@ -195,6 +190,5 @@ router.delete('/:blogId', async (req, res, next) => {
     next(err);
   }
 });
-
 
 exports.router = router;
