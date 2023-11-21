@@ -33,7 +33,7 @@ const accessLog = async (req, res, next) => {
     logger.info(`${ip} - ${time} - ${method} - ${url}`);
 
     // データベースにアクセスログを挿入
-    await insertAccessLog(ip, method, url, time);
+    await insertAccessLog({ip, method, url, time});
 
     // 次のミドルウェア/ルートハンドラーへ移行
     next();
