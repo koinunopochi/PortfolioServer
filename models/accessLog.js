@@ -28,9 +28,9 @@ exports.insertAccessLog = insertAccessLog;
  * @param {Date} endTime 取得する時間の終了
  * @returns
  */
-const getAccessLogs = async ({startTime, endTime}) => {
+const findAccessLogs = async ({startTime, endTime}) => {
   const start = new Date(startTime);
   const end = new Date(endTime);
   return await accessCollection.find({ time: { $gte: start, $lte: end } });
 };
-exports.getAccessLogs = getAccessLogs;
+exports.findAccessLogs = findAccessLogs;
