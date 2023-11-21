@@ -24,13 +24,13 @@ exports.insertAccessLog = insertAccessLog;
 
 /**
  * 時間によってアクセスされたログを取得する
- * @param {Date} start_time 取得する時間の開始
- * @param {Date} end_time 取得する時間の終了
+ * @param {Date} startTime 取得する時間の開始
+ * @param {Date} endTime 取得する時間の終了
  * @returns
  */
-const getAccessLogs = async ({start_time, end_time}) => {
-  const start = new Date(start_time);
-  const end = new Date(end_time);
+const getAccessLogs = async ({startTime, endTime}) => {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
   return await accessCollection.find({ time: { $gte: start, $lte: end } });
 };
 exports.getAccessLogs = getAccessLogs;

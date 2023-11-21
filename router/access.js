@@ -39,7 +39,7 @@ router.get('/', admin_route, async (req, res, next) => {
       end = new Date();
     }
     // アクセスログを取得します
-    const result = await getAccessLogs({ start_time: start, end_time: end });
+    const result = await getAccessLogs({ startTime: start, endTime: end });
 
     // 取得したログをJSONとしてレスポンスに含めます
     res.status(200).json(result);
