@@ -124,9 +124,9 @@ exports.ensureUserVerified = ensureUserVerified;
  * @param {string} username - リフレッシュトークンをチェックするユーザ名
  */
 const handleExistingRefreshToken = async (username) => {
-  const is_refresh_token = await getRefreshToken(username);
+  const is_refresh_token = await getRefreshToken({ username });
   if (is_refresh_token) {
-    await deleteRefreshToken(username);
+    await deleteRefreshToken({ username });
   }
 };
 

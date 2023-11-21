@@ -129,7 +129,7 @@ const loginUser = async (username, password) => {
     await handleExistingRefreshToken(username);
 
     const { token, refreshToken } = generateTokens(username);
-    await insertRefreshToken(username, refreshToken);
+    await insertRefreshToken({username, refreshToken});
     await updateAccessNum(username);
 
     return { token, refreshToken };
@@ -186,7 +186,7 @@ router.post('/logout', async (req, res, next) => {
     // usernameを取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // リフレッシュトークンを削除
-    await deleteRefreshToken(username);
+    await deleteRefreshToken({username});
     // Cookieを削除
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
@@ -205,7 +205,7 @@ router.delete('/delete', admin_route, async (req, res, next) => {
     const { username } = req.body;
     const user = await getUserAll(username);
     validateUserExistence(user);
-    await deleteRefreshToken(username);
+    await deleteRefreshToken({username});
     await deleteUser(username);
     res.status(200).json({ message: 'success' });
   } catch (error) {

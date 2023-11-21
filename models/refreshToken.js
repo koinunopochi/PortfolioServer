@@ -16,7 +16,7 @@ getDb().then((db) => {
  * @param {string} refresh_token リフレッシュ用のトークン
  * @returns insert結果を返す
  */
-const insertRefreshToken = async (username, refresh_token) => {
+const insertRefreshToken = async ({username, refresh_token}) => {
   return await refreshTokenOperations.insert({
     username,
     refresh_token,
@@ -29,7 +29,7 @@ exports.insertRefreshToken = insertRefreshToken;
  * @param {string} username
  * @returns 取得した結果を返す
  */
-const getRefreshToken = async (username) => {
+const getRefreshToken = async ({username}) => {
   return await refreshTokenOperations.findOne(
     { username },
     {
@@ -45,7 +45,7 @@ exports.getRefreshToken = getRefreshToken;
  * @param {string} username
  * @returns 結果を返す
  */
-const deleteRefreshToken = async (username) => {
+const deleteRefreshToken = async ({username}) => {
   return await refreshTokenOperations.delete({ username });
 };
 exports.deleteRefreshToken = deleteRefreshToken;
