@@ -178,10 +178,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/logout', async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
-    // リフレッシュトークンの存在確認
-    if (!refreshToken) {
-      throw new InvalidRefreshTokenError();
-    }
+    hasParam(refreshToken,"refreshToken")
     // パラメータのチェック
     ValidationParams(req.body, []);
     // usernameを取得
