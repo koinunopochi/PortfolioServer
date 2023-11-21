@@ -13,13 +13,13 @@ getDb().then((db) => {
 /**
  * 指定したユーザーにリフレッシュトークンを付与する関数
  * @param {string} username ユーザー名
- * @param {string} refresh_token リフレッシュ用のトークン
+ * @param {string} refreshToken リフレッシュ用のトークン
  * @returns insert結果を返す
  */
-const insertRefreshToken = async ({username, refresh_token}) => {
+const insertRefreshToken = async ({username, refreshToken}) => {
   return await refreshTokenOperations.insert({
     username,
-    refresh_token,
+    refresh_token:refreshToken,
   });
 };
 exports.insertRefreshToken = insertRefreshToken;
