@@ -4,7 +4,7 @@ const router = express.Router();
 const { logger } = require('../lib/logger');
 
 const { MyCustomError } = require('../lib/CustomError');
-const { getAccessLogs } = require("../models/accessLog");
+const { getAccessLogs } = require('../models/accessLog');
 const { admin_route } = require('../utils/adminRoute');
 
 /**
@@ -38,9 +38,8 @@ router.get('/', admin_route, async (req, res, next) => {
     if (!end) {
       end = new Date();
     }
-
     // アクセスログを取得します
-    const result = await getAccessLogs(start, end);
+    const result = await getAccessLogs({ start_time: start, end_time: end });
 
     // 取得したログをJSONとしてレスポンスに含めます
     res.status(200).json(result);
