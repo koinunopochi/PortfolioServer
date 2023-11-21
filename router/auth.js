@@ -12,6 +12,7 @@ const {
   validatePasswordMatch,
   ensureUserVerified,
   handleExistingRefreshToken,
+  hasParam,
 } = require('../utils/validate');
 const {
   insertUser,
@@ -129,8 +130,8 @@ const loginUser = async (username, password) => {
     await handleExistingRefreshToken(username);
 
     const { token, refreshToken } = generateTokens(username);
-    await insertRefreshToken({username, refreshToken});
-    await updateAccessNum({username});
+    await insertRefreshToken({ username, refreshToken });
+    await updateAccessNum({ username });
 
     return { token, refreshToken };
   } catch (error) {
@@ -155,7 +156,7 @@ router.post('/login', async (req, res, next) => {
     // クッキーにトークンを保存
     res.cookie('refreshToken', refreshToken, COOKIE_SETTINGS);
     res.cookie('authToken', token, COOKIE_SETTINGS);
-    
+
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
@@ -186,7 +187,7 @@ router.post('/logout', async (req, res, next) => {
     // usernameを取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // リフレッシュトークンを削除
-    await deleteRefreshToken({username});
+    await deleteRefreshToken({ username });
     // Cookieを削除
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
@@ -205,8 +206,8 @@ router.delete('/delete', admin_route, async (req, res, next) => {
     const { username } = req.body;
     const user = await findAllUserData({ username });
     validateUserExistence(user);
-    await deleteRefreshToken({username});
-    await deleteUser({username});
+    await deleteRefreshToken({ username });
+    await deleteUser({ username });
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
@@ -227,9 +228,7 @@ router.delete('/delete', admin_route, async (req, res, next) => {
 router.post('/refresh', async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
-    if (!refreshToken) {
-      throw new InvalidRefreshTokenError();
-    }
+    hasParam(refreshToken, 'refreshToken');
     // パラメータのチェック
     ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
