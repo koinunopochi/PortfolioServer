@@ -163,12 +163,12 @@ exports.validateSignupRequest = validateSignupRequest;
  * @returns {Promise<void>}
  */
 const checkExistingUser = async (username) => {
-  const user = await getUserAll(username);
+  const user = await getUserAll({ username });
   if (user && user.is_verify) {
     throw new MyCustomError('ExistUserError', 'email already exists', 400);
   } else if (user) {
     // 未認証のユーザーは削除する
-    await deleteUser(username);
+    await deleteUser({username});
   }
 };
 

@@ -59,13 +59,13 @@ const bcrypt = require('bcrypt');
 const registerUser = async (username, password, role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const verificationToken = crypto.randomBytes(16).toString('hex');
-  return await insertUser(
+  return await insertUser({
     username,
-    hashedPassword,
+    hashed_password:hashedPassword,
     verificationToken,
-    true,
-    role
-  );
+    is_verify: true,
+    role,
+  });
 };
 exports.registerUser = registerUser;
 
@@ -122,7 +122,7 @@ const loginUser = async (username, password) => {
   try {
     validateLoginCredentials({ username, password });
 
-    const user = await getUserAll(username);
+    const user = await getUserAll({username});
     validateUserExistence(user);
     await validatePasswordMatch(password, user.password);
     ensureUserVerified(user);
@@ -130,7 +130,7 @@ const loginUser = async (username, password) => {
 
     const { token, refreshToken } = generateTokens(username);
     await insertRefreshToken({username, refreshToken});
-    await updateAccessNum(username);
+    await updateAccessNum({username});
 
     return { token, refreshToken };
   } catch (error) {
@@ -203,10 +203,10 @@ router.delete('/delete', admin_route, async (req, res, next) => {
   try {
     // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
-    const user = await getUserAll(username);
+    const user = await getUserAll({username});
     validateUserExistence(user);
     await deleteRefreshToken({username});
-    await deleteUser(username);
+    await deleteUser({username});
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);

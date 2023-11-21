@@ -55,7 +55,7 @@ const isAdmin = async (req) => {
     const username = decodeItem(cookie, 'username',SECRET_KEY);
 
     // ユーザー情報を取得
-    const userInfo = await getUserAll(username);
+    const userInfo = await getUserAll({username});
     logger.debug(userInfo.role);
 
     // ユーザーが管理者であればtrueを返す

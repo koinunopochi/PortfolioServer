@@ -6,7 +6,7 @@ const { getDb } = require('../lib/mongo');
 let userOperations;
 getDb().then((db) => {
   userOperations = new DbOperations(db, 'users');
-  logger.info("MongoDB create new [users] instance")
+  logger.info('MongoDB create new [users] instance');
 });
 // const userOperations = new DbOperations('users');
 // const refreshTokenOperations = new DbOperations('refresh_tokens');
@@ -21,13 +21,13 @@ getDb().then((db) => {
  * @param {string} role adminかuserか
  * @returns insertした結果を表示
  */
-const insertUser = async (
+const insertUser = async ({
   username,
   hashed_password,
   token,
   is_verify,
-  role
-) => {
+  role,
+}) => {
   return await userOperations.insert({
     username,
     password: hashed_password,
@@ -45,7 +45,7 @@ exports.insertUser = insertUser;
  * @param {string} username ユーザー名
  * @returns getで得た結果を返す
  */
-const getUserAll = async (username) => {
+const getUserAll = async ({ username }) => {
   const result = await userOperations.findOne({ username });
   logger.debug(result);
   return result;
@@ -71,7 +71,7 @@ exports.getUsernamesRoles = getUsernamesRoles;
  * @param {string} username
  * @returns
  */
-const deleteUser = async (username) => {
+const deleteUser = async ({ username }) => {
   const result = await userOperations.delete({ username });
   return result;
 };
@@ -83,7 +83,7 @@ exports.deleteUser = deleteUser;
  * @param {string} username ユーザー名
  * @returns
  */
-const updateAccessNum = async (username) => {
+const updateAccessNum = async ({ username }) => {
   return await userOperations.update({ username }, { $inc: { access_num: 1 } });
 };
 exports.updateAccessNum = updateAccessNum;
