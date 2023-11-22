@@ -1,7 +1,5 @@
 const express = require('express');
-const {
-  MyCustomError,
-} = require('../lib/CustomError');
+const { MyCustomError, InvalidRefreshTokenError } = require('../lib/CustomError');
 const {
   checkExistingUser,
   validatePasswordMatch,
@@ -10,6 +8,8 @@ const {
   validateParametersToRefreshToken,
   validateCredentials,
   throwErrorNotExist,
+  hasParam,
+  allowingParams,
 } = require('../utils/validate');
 const {
   insertUser,
@@ -121,7 +121,7 @@ const loginUser = async (username, password) => {
     validateCredentials({ username, password });
 
     const user = await findAllUserData({ username });
-    throwErrorNotExist(user,{paramName:"user"})
+    throwErrorNotExist(user, { paramName: 'user' });
     await validatePasswordMatch(password, user.password);
     ensureUserVerified(user);
     await handleExistingRefreshToken(username);
@@ -150,10 +150,8 @@ router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const { token, refreshToken } = await loginUser(username, password);
-    // クッキーにトークンを保存
     res.cookie('refreshToken', refreshToken, COOKIE_SETTINGS);
     res.cookie('authToken', token, COOKIE_SETTINGS);
-
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
@@ -176,11 +174,8 @@ router.post('/logout', async (req, res, next) => {
   try {
     validateParametersToRefreshToken(req);
     const { refreshToken } = req.cookies;
-    // usernameを取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
-    // リフレッシュトークンを削除
     await deleteRefreshToken({ username });
-    // Cookieを削除
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
     res.status(200).json({ message: 'success' });
@@ -197,7 +192,7 @@ router.delete('/delete', admin_route, async (req, res, next) => {
     // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
     const user = await findAllUserData({ username });
-    throwErrorNotExist(user,{paramName:"user"})
+    throwErrorNotExist(user, { paramName: 'user' });
     await deleteRefreshToken({ username });
     await deleteUser({ username });
     res.status(200).json({ message: 'success' });
@@ -249,7 +244,6 @@ router.post('/refresh', async (req, res, next) => {
 router.get('/is-admin', async (req, res, next) => {
   try {
     const is_admin = await isAdmin(req);
-    logger.debug(is_admin);
     res.json({ is_admin: is_admin });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
