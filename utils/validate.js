@@ -7,6 +7,7 @@ const {
 const bcrypt = require('bcrypt');
 const { MyCustomError } = require('../lib/CustomError');
 const { firstCharUpp } = require('./util');
+const { logger } = require('../lib/logger');
 
 const ValidationError = require('../lib/CustomError').ValidationError;
 
@@ -41,7 +42,7 @@ exports.ValidationPassword = ValidationPassword;
  * @param {Number} param1.statusCode def 400,レスポンス用のHTTPステータスコード
  */
 const throwErrorNotExist = (value, { paramName, statusCode = 400 }) => {
-  const paramName_ = firstCharUpp(paramName)
+  const paramName_ = firstCharUpp(paramName);
   if (!isExist(value))
     throw new MyCustomError(
       `NotExist${paramName_}`,
@@ -154,9 +155,13 @@ exports.allowingParams = allowingParams;
  * @param {*} param チェックしたい値
  * @param {string} paramName エラー時に出力する変数名
  */
-const hasParam = (param, paramName) => {
+const hasParam = (param, paramName, statusCode=400) => {
   if (!param) {
-    throw new MyCustomError('InvalidParameter', `${paramName}の値は必須です。`);
+    throw new MyCustomError(
+      'InvalidParameter',
+      `${paramName}の値は必須です。`,
+      statusCode
+    );
   }
 };
 
@@ -169,8 +174,11 @@ exports.hasParam = hasParam;
  * @param {req.body} params リクエストのbody
  * @param {Array} allowed 必須パラメータの配列
  */
-const validateParameters = ({ param, paramName }, { params, allowed }) => {
-  hasParam(param, paramName);
+const validateParameters = (
+  { param, paramName, statusCode },
+  { params, allowed }
+) => {
+  hasParam(param, paramName, statusCode);
   allowingParams(params, allowed);
 };
 
@@ -181,10 +189,10 @@ exports.validateParameters = validateParameters;
  * @param {*} req リクエストをそのまま受け取る
  */
 const validateParametersToRefreshToken = (req) => {
-  const { refreshToken } = req.cookies;
+  const refreshToken  = req.cookies.refreshToken;
   validateParameters(
-    { param: refreshToken, param: 'refreshToken' },
-    { params: req.body, allowed: ['refreshToken'] }
+    { param: refreshToken, paramName: 'refreshToken', statusCode: 401 },
+    { params: req.cookies, allowed: ['refreshToken'] },
   );
 };
 exports.validateParametersToRefreshToken = validateParametersToRefreshToken;
