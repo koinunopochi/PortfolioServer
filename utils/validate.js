@@ -77,7 +77,7 @@ const ensureUserVerified = (user) => {
 exports.ensureUserVerified = ensureUserVerified;
 
 /**
- * 既存のリフレッシュトークンが存在する場合、それを処理します。
+ * 既存のリフレッシュトークンが存在する場合、それを削除します。
  * @param {string} username - リフレッシュトークンをチェックするユーザ名
  */
 const handleExistingRefreshToken = async (username) => {
