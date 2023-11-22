@@ -82,13 +82,13 @@ exports.validateLoginCredentials = validateLoginCredentials;
  * @param {Object} user - 検証するユーザーオブジェクト
  * @throws {MyCustomError} ユーザが存在しない場合
  */
-const validateUserExistence = (user) => {
+const isExistUser = (user) => {
   if (!user) {
     throw new MyCustomError('NotExistUser', 'not exist user', 400);
   }
 };
 
-exports.validateUserExistence = validateUserExistence;
+exports.isExistUser = isExistUser;
 
 /**
  * 入力されたパスワードと保存されているパスワードが一致するかを検証します。

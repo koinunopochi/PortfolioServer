@@ -6,11 +6,11 @@ const {
   validateSignupRequest,
   checkExistingUser,
   validateLoginCredentials,
-  validateUserExistence,
   validatePasswordMatch,
   ensureUserVerified,
   handleExistingRefreshToken,
   validateParametersToRefreshToken,
+  isExistUser,
 } = require('../utils/validate');
 const {
   insertUser,
@@ -122,7 +122,7 @@ const loginUser = async (username, password) => {
     validateLoginCredentials({ username, password });
 
     const user = await findAllUserData({ username });
-    validateUserExistence(user);
+    isExistUser(user);
     await validatePasswordMatch(password, user.password);
     ensureUserVerified(user);
     await handleExistingRefreshToken(username);
@@ -198,7 +198,7 @@ router.delete('/delete', admin_route, async (req, res, next) => {
     // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
     const user = await findAllUserData({ username });
-    validateUserExistence(user);
+    isExistUser(user);
     await deleteRefreshToken({ username });
     await deleteUser({ username });
     res.status(200).json({ message: 'success' });
