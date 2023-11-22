@@ -62,20 +62,6 @@ const allowingParams = (params, allowedParams) => {
 };
 exports.allowingParams = allowingParams;
 
-/**
- * 入力情報（ユーザ名とパスワード）を検証します。
- * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
- * @param {string} param0.username - ユーザ名
- * @param {string} param0.password - パスワード
- * @throws {MyCustomError} ユーザ名が無効の場合
- */
-const validateCredentials = ({ username, password }) => {
-  hasParam({ param: username, paramName: 'username' });
-  allowingParams({ username, password }, ['username', 'password']);
-  ValidationPassword(password);
-};
-
-exports.validateCredentials = validateCredentials;
 
 /**
  * ユーザーが存在するかを検証します。
@@ -218,3 +204,18 @@ const validateParametersToRefreshToken = (req) => {
   );
 };
 exports.validateParametersToRefreshToken = validateParametersToRefreshToken;
+
+/**
+ * 入力情報（ユーザ名とパスワード）を検証します。
+ * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
+ * @param {string} param0.username - ユーザ名
+ * @param {string} param0.password - パスワード
+ * @throws {MyCustomError} ユーザ名が無効の場合
+ */
+const validateCredentials = ({ username, password }) => {
+  hasParam({ param: username, paramName: 'username' });
+  allowingParams({ username, password }, ['username', 'password']);
+  ValidationPassword(password);
+};
+
+exports.validateCredentials = validateCredentials;
