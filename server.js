@@ -16,7 +16,8 @@ const { router: accessRouter } = require('./router/access');
 const { MyCustomError } = require('./lib/CustomError');
 const mongo = require('./lib/mongo');
 const { accessLog } = require('./utils/accessLog');
-const { getUserAll } = require('./models/user');
+const { findAllUserData } = require('./models/user');
+const { SendMail } = require('./lib/mail');
 
 const SERVER_PORT = process.env.PORT || 3000;
 
@@ -41,7 +42,6 @@ app.use('/access', accessRouter);
 app.use((req, res) => {
   throw new MyCustomError('NotFound', 'Not found', 404);
 });
-
 
 /**
  * @route USE /* - すべてのルート
@@ -84,23 +84,40 @@ app.use((err, req, res, next) => {
     error_json.error.code = 500;
     error_json.error.message = '500 Server Error';
     res.status(500).send(error_json);
-    logger.info('finish error handling');
+
+    // eエラーネームとスタックトレースを保持
+    const errObj = err.name+'\n'+err.stack;
+    console.log(errObj);
+    // エラー通知メール送信
+    sendingMail(errObj);
+
+    logger.info('finish irregularError handling');
   }
 });
 
+const sendingMail = async (error) => {
+  try {
+    const subject = '【至急対応】５００エラーが発生しました。';
+    const content = `発生時間：${new Date()}\nエラー内容：${error}`;
+    const getter = process.env.AUTH_USER_EMAIL;
+    await SendMail(getter, subject, content);
+    return true;
+  } catch (error) {
+    logger.error(error);
+  }
+};
 mongo
-  .connect().then(
-    logger.info("MongoDB connect success!!!")
-  )
+  .connect()
+  .then(logger.info('MongoDB connect success!!!'))
   .then(async () => {
     //初期化用のコード
     await mongo.init();
   })
-  .then(async() => {
+  .then(async () => {
     // adminの初期化
     const AUTH_USER_NAME = process.env.AUTH_USER_NAME;
     const AUTH_USER_PASSWORD = process.env.AUTH_USER_PASSWORD;
-    const user = await getUserAll(AUTH_USER_NAME);
+    const user = await findAllUserData({ username: AUTH_USER_NAME });
     if (!user) {
       await registerUser(AUTH_USER_NAME, AUTH_USER_PASSWORD, 'admin');
     }

@@ -1,4 +1,4 @@
-const { getUserAll, deleteUser } = require('../models/user');
+const { findAllUserData, deleteUser } = require('../models/user');
 const {
   getRefreshToken,
   deleteRefreshToken,
@@ -6,6 +6,8 @@ const {
 
 const bcrypt = require('bcrypt');
 const { MyCustomError } = require('../lib/CustomError');
+const { firstCharUpp } = require('./util');
+const { logger } = require('../lib/logger');
 
 const ValidationError = require('../lib/CustomError').ValidationError;
 
@@ -34,62 +36,31 @@ const ValidationPassword = (password) => {
 exports.ValidationPassword = ValidationPassword;
 
 /**
- * @function
- * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
- * @param {Array<string>} allowedParams - 許可されるパラメータの配列
- *
- * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
- *
- * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
- *
- * @description
- * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
- * もし許可されていないパラメータがあれば、ValidationErrorをスローします。それ以外の場合は、trueを返します。
+ * 要素の値が存在しない場合にエラーを投げる関数
+ * @param {string} value
+ * @param {string} param1.errorName エラー名
+ * @param {Number} param1.statusCode def 400,レスポンス用のHTTPステータスコード
  */
-const ValidationParams = (params, allowedParams) => {
-  // const allowedParams = ['model', 'prompt'];
-  const receivedParams = Object.keys(params);
-  const invalidParams = receivedParams.filter(
-    (param) => !allowedParams.includes(param)
-  );
-  if (invalidParams.length > 0) {
-    throw new ValidationError(`Invalid params: ${invalidParams.join(', ')}`);
-  } else {
-    return true;
-  }
+const throwErrorNotExist = (value, { paramName, statusCode = 400 }) => {
+  const paramName_ = firstCharUpp(paramName);
+  if (!isExist(value))
+    throw new MyCustomError(
+      `NotExist${paramName_}`,
+      `Not exist ${paramName_}`,
+      statusCode
+    );
 };
-exports.ValidationParams = ValidationParams;
+exports.throwErrorNotExist = throwErrorNotExist;
 
 /**
- * ログインの際の入力情報（ユーザ名とパスワード）を検証します。
- * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
- * @param {string} param0.username - ユーザ名
- * @param {string} param0.password - パスワード
- * @throws {MyCustomError} ユーザ名が無効の場合
+ * 値が存在しているかを検証します
+ * @param {*} value 値
+ * @returns boolean
  */
-const validateLoginCredentials = ({ username, password }) => {
-  ValidationParams({ username, password }, ['username', 'password']);
-
-  if (username == '') {
-    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-  }
-  ValidationPassword(password);
+const isExist = (value) => {
+  if (value) return true;
+  return false;
 };
-
-exports.validateLoginCredentials = validateLoginCredentials;
-
-/**
- * ユーザーが存在するかを検証します。
- * @param {Object} user - 検証するユーザーオブジェクト
- * @throws {MyCustomError} ユーザが存在しない場合
- */
-const validateUserExistence = (user) => {
-  if (!user) {
-    throw new MyCustomError('NotExistUser', 'not exist user', 400);
-  }
-};
-
-exports.validateUserExistence = validateUserExistence;
 
 /**
  * 入力されたパスワードと保存されているパスワードが一致するかを検証します。
@@ -120,37 +91,17 @@ const ensureUserVerified = (user) => {
 exports.ensureUserVerified = ensureUserVerified;
 
 /**
- * 既存のリフレッシュトークンが存在する場合、それを処理します。
+ * 既存のリフレッシュトークンが存在する場合、それを削除します。
  * @param {string} username - リフレッシュトークンをチェックするユーザ名
  */
 const handleExistingRefreshToken = async (username) => {
-  const is_refresh_token = await getRefreshToken(username);
+  const is_refresh_token = await getRefreshToken({ username });
   if (is_refresh_token) {
-    await deleteRefreshToken(username);
+    await deleteRefreshToken({ username });
   }
 };
 
 exports.handleExistingRefreshToken = handleExistingRefreshToken;
-
-/**
- * サインアップリクエストのパラメータを検証します。
- *
- * @function
- * @name validateSignupRequest
- * @param {Object} params ユーザーパラメータ
- * @param {string} params.username サインアップするユーザーのユーザー名
- * @param {string} params.password サインアップするユーザーのパスワード
- * @throws {MyCustomError} パラメータが無効な場合にカスタムエラーを投げます
- */
-const validateSignupRequest = ({ username, password }) => {
-  ValidationParams({ username, password }, ['username', 'password']);
-  if (username === '') {
-    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-  }
-  ValidationPassword(password);
-};
-
-exports.validateSignupRequest = validateSignupRequest;
 
 /**
  * 既存のユーザーを確認し、該当するユーザーが存在する場合は削除します。
@@ -163,13 +114,100 @@ exports.validateSignupRequest = validateSignupRequest;
  * @returns {Promise<void>}
  */
 const checkExistingUser = async (username) => {
-  const user = await getUserAll(username);
+  const user = await findAllUserData({ username });
   if (user && user.is_verify) {
     throw new MyCustomError('ExistUserError', 'email already exists', 400);
   } else if (user) {
     // 未認証のユーザーは削除する
-    await deleteUser(username);
+    await deleteUser({ username });
   }
 };
 
 exports.checkExistingUser = checkExistingUser;
+
+// ＃＃＃＃＃＃＃＃＃＃　reqのパラメータチェック　＃＃＃＃＃＃＃＃＃＃＃
+
+/**
+ * @function
+ * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
+ * @param {Array<string>} allowedParams - 許可されるパラメータの配列
+ * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
+ * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
+ * @description
+ * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
+ * もし許可されていないパラメータがあれば、ValidationErrorをスローします。
+ */
+const allowingParams = (params, allowedParams) => {
+  const receivedParams = Object.keys(params);
+  const invalidParams = receivedParams.filter(
+    (param) => !allowedParams.includes(param)
+  );
+  if (invalidParams.length > 0) {
+    throw new ValidationError(
+      `許可されていないパラメータです。: ${invalidParams.join(', ')}`
+    );
+  }
+};
+exports.allowingParams = allowingParams;
+
+/**
+ * 指定されたパラメータに値がない場合に、parmNameの値は必須であるというエラーを投げる
+ * @param {*} param チェックしたい値
+ * @param {string} paramName エラー時に出力する変数名
+ */
+const hasParam = (param, paramName, statusCode=400) => {
+  if (!param) {
+    throw new MyCustomError(
+      'InvalidParameter',
+      `${paramName}の値は必須です。`,
+      statusCode
+    );
+  }
+};
+
+exports.hasParam = hasParam;
+
+/**
+ * 必須のパラメータがあるか、余計なパラメータがついていないかをチェックする関数
+ * @param {*} param 検証したいパラメータ
+ * @param {string} paramName 必須パラメータの変数名
+ * @param {req.body} params リクエストのbody
+ * @param {Array} allowed 必須パラメータの配列
+ */
+const validateParameters = (
+  { param, paramName, statusCode },
+  { params, allowed }
+) => {
+  hasParam(param, paramName, statusCode);
+  allowingParams(params, allowed);
+};
+
+exports.validateParameters = validateParameters;
+
+/**
+ * リフレッシュtokenのバリデーションに関して統合的な処理を行う関数
+ * @param {*} req リクエストをそのまま受け取る
+ */
+const validateParametersToRefreshToken = (req) => {
+  const refreshToken  = req.cookies.refreshToken;
+  validateParameters(
+    { param: refreshToken, paramName: 'refreshToken', statusCode: 401 },
+    { params: req.cookies, allowed: ['refreshToken'] },
+  );
+};
+exports.validateParametersToRefreshToken = validateParametersToRefreshToken;
+
+/**
+ * 入力情報（ユーザ名とパスワード）を検証します。
+ * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
+ * @param {string} param0.username - ユーザ名
+ * @param {string} param0.password - パスワード
+ * @throws {MyCustomError} ユーザ名が無効の場合
+ */
+const validateCredentials = ({ username, password }) => {
+  hasParam({ param: username, paramName: 'username' });
+  allowingParams({ username, password }, ['username', 'password']);
+  ValidationPassword(password);
+};
+
+exports.validateCredentials = validateCredentials;

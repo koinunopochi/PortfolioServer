@@ -1,21 +1,19 @@
 const express = require('express');
+const { MyCustomError, InvalidRefreshTokenError } = require('../lib/CustomError');
 const {
-  MyCustomError,
-  InvalidRefreshTokenError,
-} = require('../lib/CustomError');
-const {
-  ValidationParams,
-  validateSignupRequest,
   checkExistingUser,
-  validateLoginCredentials,
-  validateUserExistence,
   validatePasswordMatch,
   ensureUserVerified,
   handleExistingRefreshToken,
+  validateParametersToRefreshToken,
+  validateCredentials,
+  throwErrorNotExist,
+  hasParam,
+  allowingParams,
 } = require('../utils/validate');
 const {
   insertUser,
-  getUserAll,
+  findAllUserData,
   updateAccessNum,
   deleteUser,
   getUsernamesRoles,
@@ -32,6 +30,7 @@ const { decodeItem, generateTokens } = require('../lib/jwtHelper');
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
+const AUTH_TOKEN_TIME = process.env.AUTH_TOKEN_TIME;
 
 // 環境固有の .env ファイルの読み込み
 const envPath = `.env.${process.env.NODE_ENV}`;
@@ -58,13 +57,13 @@ const bcrypt = require('bcrypt');
 const registerUser = async (username, password, role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const verificationToken = crypto.randomBytes(16).toString('hex');
-  return await insertUser(
+  return await insertUser({
     username,
     hashedPassword,
     verificationToken,
-    true,
-    role
-  );
+    isVerify: true,
+    role,
+  });
 };
 exports.registerUser = registerUser;
 
@@ -89,7 +88,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    validateSignupRequest({ username, password });
+    validateCredentials({ username, password });
     await checkExistingUser(username);
     await registerUser(username, password, 'user');
 
@@ -119,17 +118,17 @@ router.post('/signup', admin_route, async (req, res, next) => {
  */
 const loginUser = async (username, password) => {
   try {
-    validateLoginCredentials({ username, password });
+    validateCredentials({ username, password });
 
-    const user = await getUserAll(username);
-    validateUserExistence(user);
+    const user = await findAllUserData({ username });
+    throwErrorNotExist(user, { paramName: 'user' });
     await validatePasswordMatch(password, user.password);
     ensureUserVerified(user);
     await handleExistingRefreshToken(username);
 
     const { token, refreshToken } = generateTokens(username);
-    await insertRefreshToken(username, refreshToken);
-    await updateAccessNum(username);
+    await insertRefreshToken({ username, refreshToken });
+    await updateAccessNum({ username });
 
     return { token, refreshToken };
   } catch (error) {
@@ -151,10 +150,8 @@ router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const { token, refreshToken } = await loginUser(username, password);
-    // クッキーにトークンを保存
     res.cookie('refreshToken', refreshToken, COOKIE_SETTINGS);
     res.cookie('authToken', token, COOKIE_SETTINGS);
-    
     res.json({ message: 'Login successful' });
   } catch (err) {
     next(err);
@@ -175,18 +172,10 @@ router.post('/login', async (req, res, next) => {
  */
 router.post('/logout', async (req, res, next) => {
   try {
+    validateParametersToRefreshToken(req);
     const { refreshToken } = req.cookies;
-    // リフレッシュトークンの存在確認
-    if (!refreshToken) {
-      throw new InvalidRefreshTokenError();
-    }
-    // パラメータのチェック
-    ValidationParams(req.body, []);
-    // usernameを取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
-    // リフレッシュトークンを削除
-    await deleteRefreshToken(username);
-    // Cookieを削除
+    await deleteRefreshToken({ username });
     res.clearCookie('authToken');
     res.clearCookie('refreshToken');
     res.status(200).json({ message: 'success' });
@@ -202,10 +191,10 @@ router.delete('/delete', admin_route, async (req, res, next) => {
   try {
     // 一意の値であるため、usernameを使用してユーザーを取得します。
     const { username } = req.body;
-    const user = await getUserAll(username);
-    validateUserExistence(user);
-    await deleteRefreshToken(username);
-    await deleteUser(username);
+    const user = await findAllUserData({ username });
+    throwErrorNotExist(user, { paramName: 'user' });
+    await deleteRefreshToken({ username });
+    await deleteUser({ username });
     res.status(200).json({ message: 'success' });
   } catch (error) {
     next(error);
@@ -225,17 +214,13 @@ router.delete('/delete', admin_route, async (req, res, next) => {
  */
 router.post('/refresh', async (req, res, next) => {
   try {
+    validateParametersToRefreshToken(req);
     const { refreshToken } = req.cookies;
-    if (!refreshToken) {
-      throw new InvalidRefreshTokenError();
-    }
-    // パラメータのチェック
-    ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // usernameからtokenの作成
     const token = jwt.sign({ username }, SECRET_KEY, {
-      expiresIn: '15m',
+      expiresIn: AUTH_TOKEN_TIME,
     });
     // クッキーにトークンを保存
     res.cookie('authToken', token, COOKIE_SETTINGS);
@@ -259,7 +244,6 @@ router.post('/refresh', async (req, res, next) => {
 router.get('/is-admin', async (req, res, next) => {
   try {
     const is_admin = await isAdmin(req);
-    logger.debug(is_admin);
     res.json({ is_admin: is_admin });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

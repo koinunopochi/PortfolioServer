@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const { logger } = require('../lib/logger');
-
-const { MyCustomError } = require('../lib/CustomError');
-const { getAccessLogs } = require("../models/accessLog");
+const { findAccessLogs } = require('../models/accessLog');
 const { admin_route } = require('../utils/adminRoute');
+
+const { validateParameters } = require('../utils/validate');
 
 /**
  * GET / - アクセスログを取得します
@@ -22,33 +22,28 @@ const { admin_route } = require('../utils/adminRoute');
  */
 router.get('/', admin_route, async (req, res, next) => {
   try {
-    // クエリパラメータを取得します
-    const { start } = req.query;
-    let { end } = req.query;
+    const { start, end } = req.query;
 
-    // クエリパラメータをログに出力します
     logger.info(req.query);
 
-    // startパラメータが不在の場合、カスタムエラーをスローします
-    if (!start) {
-      throw new MyCustomError('InvalidStartTime', 'startの値は必須です。', 400);
-    }
-
-    // endパラメータが不在の場合、現在の日時をデフォルト値とします
-    if (!end) {
-      end = new Date();
-    }
+    validateParameters(
+      {
+        param: start,
+        paramName: 'start',
+      },
+      { params: req.query, allowed: ['start'] }
+    );
 
     // アクセスログを取得します
-    const result = await getAccessLogs(start, end);
+    const result = await findAccessLogs({
+      startTime: start,
+      endTime: end || new Date(),
+    });
 
-    // 取得したログをJSONとしてレスポンスに含めます
     res.status(200).json(result);
   } catch (error) {
-    // エラーハンドリングミドルウェアにエラーオブジェクトを渡します
     next(error);
   }
 });
 
-// ルーターをエクスポートします
 exports.router = router;
