@@ -45,18 +45,16 @@ router.get('/overviews', async (req, res, next) => {
  */
 router.get('/:blogId', async (req, res, next) => {
   try {
-    const blog = await getBlog({id:req.params.blogId});
-    if (blog) {
-      res.json(blog);
-    } else {
+    const blog = await getBlog({ id: req.params.blogId });
+    if (!blog) {
       throw new MyCustomError('BlogNotFound', 'blog not found', 404);
     }
+    res.json(blog);
   } catch (err) {
     if ((err.name = 'BSONError')) {
       next(new MyCustomError('InvalidBlogId', 'invalid blog id', 400));
-    } else {
-      next(err);
     }
+    next(err);
   }
 });
 
@@ -178,8 +176,8 @@ router.put('/:blogId', async (req, res, next) => {
  */
 router.delete('/:blogId', async (req, res, next) => {
   try {
-    const isDeleted = await deleteBlog({id:req.params.blogId});
-    logger.debug(isDeleted);
+    const isDeleted = await deleteBlog({ id: req.params.blogId });
+    
     if (isDeleted) {
       logger.info('deleted blog' + req.params.blogId);
       res.json({ message: 'Blog deleted' });
