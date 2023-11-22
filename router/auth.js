@@ -3,14 +3,13 @@ const {
   MyCustomError,
 } = require('../lib/CustomError');
 const {
-  validateSignupRequest,
   checkExistingUser,
-  validateLoginCredentials,
   validatePasswordMatch,
   ensureUserVerified,
   handleExistingRefreshToken,
   validateParametersToRefreshToken,
   isExistUser,
+  validateCredentials,
 } = require('../utils/validate');
 const {
   insertUser,
@@ -89,7 +88,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    validateSignupRequest({ username, password });
+    validateCredentials({ username, password });
     await checkExistingUser(username);
     await registerUser(username, password, 'user');
 
@@ -119,7 +118,7 @@ router.post('/signup', admin_route, async (req, res, next) => {
  */
 const loginUser = async (username, password) => {
   try {
-    validateLoginCredentials({ username, password });
+    validateCredentials({ username, password });
 
     const user = await findAllUserData({ username });
     isExistUser(user);

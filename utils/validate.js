@@ -63,19 +63,19 @@ const allowingParams = (params, allowedParams) => {
 exports.allowingParams = allowingParams;
 
 /**
- * ログインの際の入力情報（ユーザ名とパスワード）を検証します。
+ * 入力情報（ユーザ名とパスワード）を検証します。
  * @param {Object} param0 - ユーザ名とパスワードのオブジェクト
  * @param {string} param0.username - ユーザ名
  * @param {string} param0.password - パスワード
  * @throws {MyCustomError} ユーザ名が無効の場合
  */
-const validateLoginCredentials = ({ username, password }) => {
+const validateCredentials = ({ username, password }) => {
   hasParam({ param: username, paramName: 'username' });
   allowingParams({ username, password }, ['username', 'password']);
   ValidationPassword(password);
 };
 
-exports.validateLoginCredentials = validateLoginCredentials;
+exports.validateCredentials = validateCredentials;
 
 /**
  * ユーザーが存在するかを検証します。
@@ -89,6 +89,7 @@ const isExistUser = (user) => {
 };
 
 exports.isExistUser = isExistUser;
+
 
 /**
  * 入力されたパスワードと保存されているパスワードが一致するかを検証します。
@@ -131,23 +132,6 @@ const handleExistingRefreshToken = async (username) => {
 
 exports.handleExistingRefreshToken = handleExistingRefreshToken;
 
-/**
- * サインアップリクエストのパラメータを検証します。
- *
- * @function
- * @name validateSignupRequest
- * @param {Object} params ユーザーパラメータ
- * @param {string} params.username サインアップするユーザーのユーザー名
- * @param {string} params.password サインアップするユーザーのパスワード
- * @throws {MyCustomError} パラメータが無効な場合にカスタムエラーを投げます
- */
-const validateSignupRequest = ({ username, password }) => {
-  hasParam({param:username,paramName:"username"})
-  allowingParams({ username, password }, ['username', 'password']);
-  ValidationPassword(password);
-};
-
-exports.validateSignupRequest = validateSignupRequest;
 
 /**
  * 既存のユーザーを確認し、該当するユーザーが存在する場合は削除します。
