@@ -70,7 +70,7 @@ exports.allowingParams = allowingParams;
  * @throws {MyCustomError} ユーザ名が無効の場合
  */
 const validateLoginCredentials = ({ username, password }) => {
-  hasParam({param:username,paramName:"username"})
+  hasParam({ param: username, paramName: 'username' });
   allowingParams({ username, password }, ['username', 'password']);
   ValidationPassword(password);
 };
@@ -142,10 +142,8 @@ exports.handleExistingRefreshToken = handleExistingRefreshToken;
  * @throws {MyCustomError} パラメータが無効な場合にカスタムエラーを投げます
  */
 const validateSignupRequest = ({ username, password }) => {
+  hasParam({param:username,paramName:"username"})
   allowingParams({ username, password }, ['username', 'password']);
-  if (username === '') {
-    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-  }
   ValidationPassword(password);
 };
 
@@ -172,6 +170,30 @@ const checkExistingUser = async (username) => {
 };
 
 exports.checkExistingUser = checkExistingUser;
+
+/**
+ * 要素の値が存在しない場合にエラーを投げる関数
+ * @param {string} value
+ * @param {string} param1.errorName エラー名
+ * @param {string} param1.errorMessage エラーメッセージ
+ * @param {Number} param1.errorCode レスポンス用のHTTPステータスコード
+ */
+const throwErrorNotExist = (value, { errorName, errorMessage, statusCode }) => {
+  if (!isExist(value))
+    throw new MyCustomError(errorName, errorMessage, statusCode);
+};
+
+/**
+ * 値が存在しているかを検証します
+ * @param {*} value 値
+ * @returns boolean
+ */
+const isExist = (value) => {
+  if (value) return true;
+  return false;
+};
+
+// ＃＃＃＃＃＃＃＃＃＃　reqのパラメータチェック　＃＃＃＃＃＃＃＃＃＃＃
 
 /**
  * 指定されたパラメータに値がない場合に、parmNameの値は必須であるというエラーを投げる
