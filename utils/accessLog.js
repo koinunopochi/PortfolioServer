@@ -20,13 +20,9 @@ const { logger } = require('../lib/logger');
  */
 const accessLog = async (req, res, next) => {
   try {
-    // IPアドレスの取得
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    // HTTPメソッドの取得
     const method = req.method;
-    // アクセスされたURLの取得
     const url = req.url;
-    // アクセス時刻の取得
     const time = new Date();
 
     // ログにアクセス情報を出力
@@ -34,11 +30,8 @@ const accessLog = async (req, res, next) => {
 
     // データベースにアクセスログを挿入
     await insertAccessLog({ip, method, url, time});
-
-    // 次のミドルウェア/ルートハンドラーへ移行
     next();
   } catch (error) {
-    // エラーハンドリングミドルウェアへエラーオブジェクトを渡す
     next(error);
   }
 };
