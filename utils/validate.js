@@ -33,33 +33,6 @@ const ValidationPassword = (password) => {
 
 exports.ValidationPassword = ValidationPassword;
 
-// 今後validateonParmsは削除予定
-/**
- * @function
- * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
- * @param {Array<string>} allowedParams - 許可されるパラメータの配列
- *
- * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
- *
- * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
- *
- * @description
- * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
- * もし許可されていないパラメータがあれば、ValidationErrorをスローします。それ以外の場合は、trueを返します。
- */
-const ValidationParams = (params, allowedParams) => {
-  // const allowedParams = ['model', 'prompt'];
-  const receivedParams = Object.keys(params);
-  const invalidParams = receivedParams.filter(
-    (param) => !allowedParams.includes(param)
-  );
-  if (invalidParams.length > 0) {
-    throw new ValidationError(`Invalid params: ${invalidParams.join(', ')}`);
-  } else {
-    return true;
-  }
-};
-exports.ValidationParams = ValidationParams;
 /**
  * @function
  * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
@@ -97,7 +70,7 @@ exports.allowingParams = allowingParams;
  * @throws {MyCustomError} ユーザ名が無効の場合
  */
 const validateLoginCredentials = ({ username, password }) => {
-  ValidationParams({ username, password }, ['username', 'password']);
+  allowingParams({ username, password }, ['username', 'password']);
 
   if (username == '') {
     throw new MyCustomError('InvalidUsername', 'invalid username', 400);
@@ -172,7 +145,7 @@ exports.handleExistingRefreshToken = handleExistingRefreshToken;
  * @throws {MyCustomError} パラメータが無効な場合にカスタムエラーを投げます
  */
 const validateSignupRequest = ({ username, password }) => {
-  ValidationParams({ username, password }, ['username', 'password']);
+  allowingParams({ username, password }, ['username', 'password']);
   if (username === '') {
     throw new MyCustomError('InvalidUsername', 'invalid username', 400);
   }
@@ -230,6 +203,10 @@ const validateParameters = ({ param, paramName }, { params, allowed }) => {
 
 exports.validateParameters = validateParameters;
 
+/**
+ * リフレッシュtokenのバリデーションに関して統合的な処理を行う関数
+ * @param {*} req リクエストをそのまま受け取る
+ */
 const validateParametersToRefreshToken = (req) => {
   const { refreshToken } = req.cookies;
   validateParameters(
