@@ -1,6 +1,5 @@
 const { findAllUserData } = require('../models/user');
 const { MyCustomError } = require('../lib/CustomError');
-const { logger } = require('../lib/logger');
 const { decodeItem } = require('../lib/jwtHelper');
 
 require('dotenv').config();
@@ -50,19 +49,16 @@ exports.admin_route = protect;
  */
 const isAdmin = async (req) => {
   try {
-    const cookie = req.cookies.authToken;
+    const { authToken } = req.cookies;
     // トークンからユーザー名をデコードする
-    const username = decodeItem(cookie, 'username',SECRET_KEY);
+    const username = decodeItem(authToken, 'username', SECRET_KEY);
 
     // ユーザー情報を取得
     const userInfo = await findAllUserData({ username });
-    logger.debug(userInfo.role);
 
-    // ユーザーが管理者であればtrueを返す
-    if (userInfo.role === 'admin') {
-      return true;
-    }
+    if (userInfo.role === 'admin') return true;
     return false;
+
   } catch (error) {
     throw error;
   }
