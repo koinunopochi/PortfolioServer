@@ -1,6 +1,7 @@
 const { findAllUserData } = require('../models/user');
 const { MyCustomError } = require('../lib/CustomError');
 const { decodeItem } = require('../lib/jwtHelper');
+const { logger } = require('../lib/logger');
 
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -24,7 +25,7 @@ const protect = async (req, res, next) => {
     // 管理者かどうかを確認する
     const is_admin = await isAdmin(req);
     // ユーザーが管理者でない場合はエラーを投げる
-    if (is_admin !== true) {
+    if (!is_admin) {
       throw new MyCustomError('InvalidUser', 'invalid user', 400);
     }
     next();
@@ -49,16 +50,19 @@ exports.admin_route = protect;
  */
 const isAdmin = async (req) => {
   try {
-    const { authToken } = req.cookies;
+    const cookie = req.cookies.authToken;
     // トークンからユーザー名をデコードする
-    const username = decodeItem(authToken, 'username', SECRET_KEY);
+    const username = decodeItem(cookie, 'username', SECRET_KEY);
 
     // ユーザー情報を取得
     const userInfo = await findAllUserData({ username });
+    logger.debug(userInfo.role);
 
-    if (userInfo.role === 'admin') return true;
+    // ユーザーが管理者であればtrueを返す
+    if (userInfo.role === 'admin') {
+      return true;
+    }
     return false;
-
   } catch (error) {
     throw error;
   }
