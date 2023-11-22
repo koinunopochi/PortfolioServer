@@ -112,28 +112,6 @@ const checkExistingUser = async (username) => {
 
 exports.checkExistingUser = checkExistingUser;
 
-/**
- * 要素の値が存在しない場合にエラーを投げる関数
- * @param {string} value
- * @param {string} param1.errorName エラー名
- * @param {string} param1.errorMessage エラーメッセージ
- * @param {Number} param1.errorCode レスポンス用のHTTPステータスコード
- */
-const throwErrorNotExist = (value, { errorName, errorMessage, statusCode }) => {
-  if (!isExist(value))
-    throw new MyCustomError(errorName, errorMessage, statusCode);
-};
-
-/**
- * 値が存在しているかを検証します
- * @param {*} value 値
- * @returns boolean
- */
-const isExist = (value) => {
-  if (value) return true;
-  return false;
-};
-
 // ＃＃＃＃＃＃＃＃＃＃　reqのパラメータチェック　＃＃＃＃＃＃＃＃＃＃＃
 
 /**
