@@ -70,11 +70,8 @@ exports.allowingParams = allowingParams;
  * @throws {MyCustomError} ユーザ名が無効の場合
  */
 const validateLoginCredentials = ({ username, password }) => {
+  hasParam({param:username,paramName:"username"})
   allowingParams({ username, password }, ['username', 'password']);
-
-  if (username == '') {
-    throw new MyCustomError('InvalidUsername', 'invalid username', 400);
-  }
   ValidationPassword(password);
 };
 
