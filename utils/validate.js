@@ -33,29 +33,6 @@ const ValidationPassword = (password) => {
 
 exports.ValidationPassword = ValidationPassword;
 
-/**
- * @function
- * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
- * @param {Array<string>} allowedParams - 許可されるパラメータの配列
- * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
- * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
- * @description
- * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
- * もし許可されていないパラメータがあれば、ValidationErrorをスローします。
- */
-const allowingParams = (params, allowedParams) => {
-  const receivedParams = Object.keys(params);
-  const invalidParams = receivedParams.filter(
-    (param) => !allowedParams.includes(param)
-  );
-  if (invalidParams.length > 0) {
-    throw new ValidationError(
-      `許可されていないパラメータです。: ${invalidParams.join(', ')}`
-    );
-  }
-};
-exports.allowingParams = allowingParams;
-
 
 /**
  * ユーザーが存在するかを検証します。
@@ -158,6 +135,29 @@ const isExist = (value) => {
 };
 
 // ＃＃＃＃＃＃＃＃＃＃　reqのパラメータチェック　＃＃＃＃＃＃＃＃＃＃＃
+
+/**
+ * @function
+ * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
+ * @param {Array<string>} allowedParams - 許可されるパラメータの配列
+ * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
+ * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
+ * @description
+ * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
+ * もし許可されていないパラメータがあれば、ValidationErrorをスローします。
+ */
+const allowingParams = (params, allowedParams) => {
+  const receivedParams = Object.keys(params);
+  const invalidParams = receivedParams.filter(
+    (param) => !allowedParams.includes(param)
+  );
+  if (invalidParams.length > 0) {
+    throw new ValidationError(
+      `許可されていないパラメータです。: ${invalidParams.join(', ')}`
+    );
+  }
+};
+exports.allowingParams = allowingParams;
 
 /**
  * 指定されたパラメータに値がない場合に、parmNameの値は必須であるというエラーを投げる
