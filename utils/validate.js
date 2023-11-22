@@ -6,6 +6,7 @@ const {
 
 const bcrypt = require('bcrypt');
 const { MyCustomError } = require('../lib/CustomError');
+const { firstCharUpp } = require('./util');
 
 const ValidationError = require('../lib/CustomError').ValidationError;
 
@@ -33,20 +34,32 @@ const ValidationPassword = (password) => {
 
 exports.ValidationPassword = ValidationPassword;
 
+/**
+ * 要素の値が存在しない場合にエラーを投げる関数
+ * @param {string} value
+ * @param {string} param1.errorName エラー名
+ * @param {Number} param1.statusCode def 400,レスポンス用のHTTPステータスコード
+ */
+const throwErrorNotExist = (value, { paramName, statusCode = 400 }) => {
+  const paramName_ = firstCharUpp(paramName)
+  if (!isExist(value))
+    throw new MyCustomError(
+      `NotExist${paramName_}`,
+      `Not exist ${paramName_}`,
+      statusCode
+    );
+};
+exports.throwErrorNotExist = throwErrorNotExist;
 
 /**
- * ユーザーが存在するかを検証します。
- * @param {Object} user - 検証するユーザーオブジェクト
- * @throws {MyCustomError} ユーザが存在しない場合
+ * 値が存在しているかを検証します
+ * @param {*} value 値
+ * @returns boolean
  */
-const isExistUser = (user) => {
-  if (!user) {
-    throw new MyCustomError('NotExistUser', 'not exist user', 400);
-  }
+const isExist = (value) => {
+  if (value) return true;
+  return false;
 };
-
-exports.isExistUser = isExistUser;
-
 
 /**
  * 入力されたパスワードと保存されているパスワードが一致するかを検証します。
@@ -88,7 +101,6 @@ const handleExistingRefreshToken = async (username) => {
 };
 
 exports.handleExistingRefreshToken = handleExistingRefreshToken;
-
 
 /**
  * 既存のユーザーを確認し、該当するユーザーが存在する場合は削除します。
