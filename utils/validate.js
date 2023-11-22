@@ -37,17 +37,13 @@ exports.ValidationPassword = ValidationPassword;
  * @function
  * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
  * @param {Array<string>} allowedParams - 許可されるパラメータの配列
- *
  * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
- *
  * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
- *
  * @description
  * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
- * もし許可されていないパラメータがあれば、ValidationErrorをスローします。それ以外の場合は、trueを返します。
+ * もし許可されていないパラメータがあれば、ValidationErrorをスローします。
  */
 const allowingParams = (params, allowedParams) => {
-  // const allowedParams = ['model', 'prompt'];
   const receivedParams = Object.keys(params);
   const invalidParams = receivedParams.filter(
     (param) => !allowedParams.includes(param)
@@ -56,8 +52,6 @@ const allowingParams = (params, allowedParams) => {
     throw new ValidationError(
       `許可されていないパラメータです。: ${invalidParams.join(', ')}`
     );
-  } else {
-    return true;
   }
 };
 exports.allowingParams = allowingParams;
