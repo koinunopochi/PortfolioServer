@@ -33,6 +33,7 @@ const ValidationPassword = (password) => {
 
 exports.ValidationPassword = ValidationPassword;
 
+// 今後validateonParmsは削除予定
 /**
  * @function
  * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
@@ -59,6 +60,32 @@ const ValidationParams = (params, allowedParams) => {
   }
 };
 exports.ValidationParams = ValidationParams;
+/**
+ * @function
+ * @param {Object} params - チェックすべきパラメータが含まれるオブジェクト
+ * @param {Array<string>} allowedParams - 許可されるパラメータの配列
+ *
+ * @returns {boolean} - パラメータが有効な場合はtrueを返し、無効な場合はValidationErrorをスローします。
+ *
+ * @throws {ValidationError} - 無効なパラメータが存在する場合にスローされます。
+ *
+ * @description
+ * この関数は、指定されたオブジェクト内のパラメータが許可されたパラメータリストに準拠しているかどうかをチェックします。
+ * もし許可されていないパラメータがあれば、ValidationErrorをスローします。それ以外の場合は、trueを返します。
+ */
+const allowingParams = (params, allowedParams) => {
+  // const allowedParams = ['model', 'prompt'];
+  const receivedParams = Object.keys(params);
+  const invalidParams = receivedParams.filter(
+    (param) => !allowedParams.includes(param)
+  );
+  if (invalidParams.length > 0) {
+    throw new ValidationError(`許可されていないパラメータです。: ${invalidParams.join(', ')}`);
+  } else {
+    return true;
+  }
+};
+exports.allowingParams = allowingParams;
 
 /**
  * ログインの際の入力情報（ユーザ名とパスワード）を検証します。
@@ -180,8 +207,23 @@ exports.checkExistingUser = checkExistingUser;
  * @param {string} paramName エラー時に出力する変数名
  */
 const hasParam = (param, paramName) => {
-  if (!param)
+  if (!param) {
     throw new MyCustomError('InvalidParameter', `${paramName}の値は必須です。`);
+  }
 };
 
 exports.hasParam = hasParam;
+
+/**
+ * 必須のパラメータがあるか、余計なパラメータがついていないかをチェックする関数
+ * @param {*} param 検証したいパラメータ
+ * @param {string} paramName 必須パラメータの変数名
+ * @param {req.body} params リクエストのbody
+ * @param {Array} allowed 必須パラメータの配列
+ */
+const validateParameters = ({ param, paramName },{params,allowed}) => {
+  hasParam(param, paramName);
+  allowingParams(params, allowed);
+};
+
+exports.validateParameters = validateParameters;

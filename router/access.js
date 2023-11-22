@@ -5,7 +5,7 @@ const { logger } = require('../lib/logger');
 const { findAccessLogs } = require('../models/accessLog');
 const { admin_route } = require('../utils/adminRoute');
 
-const { hasParam } = require('/utils/validate');
+const { validateParameters } = require('../utils/validate');
 
 /**
  * GET / - アクセスログを取得します
@@ -26,7 +26,13 @@ router.get('/', admin_route, async (req, res, next) => {
 
     logger.info(req.query);
 
-    hasParam(start, 'start');
+    validateParameters(
+      {
+        param: start,
+        paramName: 'start',
+      },
+      { params: req.query, allowed: ['start'] }
+    );
 
     // アクセスログを取得します
     const result = await findAccessLogs({
