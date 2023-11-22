@@ -80,7 +80,9 @@ const allowingParams = (params, allowedParams) => {
     (param) => !allowedParams.includes(param)
   );
   if (invalidParams.length > 0) {
-    throw new ValidationError(`許可されていないパラメータです。: ${invalidParams.join(', ')}`);
+    throw new ValidationError(
+      `許可されていないパラメータです。: ${invalidParams.join(', ')}`
+    );
   } else {
     return true;
   }
@@ -221,9 +223,18 @@ exports.hasParam = hasParam;
  * @param {req.body} params リクエストのbody
  * @param {Array} allowed 必須パラメータの配列
  */
-const validateParameters = ({ param, paramName },{params,allowed}) => {
+const validateParameters = ({ param, paramName }, { params, allowed }) => {
   hasParam(param, paramName);
   allowingParams(params, allowed);
 };
 
 exports.validateParameters = validateParameters;
+
+const validateParametersToRefreshToken = (req) => {
+  const { refreshToken } = req.cookies;
+  validateParameters(
+    { param: refreshToken, param: 'refreshToken' },
+    { params: req.body, allowed: ['refreshToken'] }
+  );
+};
+exports.validateParametersToRefreshToken = validateParametersToRefreshToken;

@@ -1,10 +1,8 @@
 const express = require('express');
 const {
   MyCustomError,
-  InvalidRefreshTokenError,
 } = require('../lib/CustomError');
 const {
-  ValidationParams,
   validateSignupRequest,
   checkExistingUser,
   validateLoginCredentials,
@@ -12,7 +10,7 @@ const {
   validatePasswordMatch,
   ensureUserVerified,
   handleExistingRefreshToken,
-  hasParam,
+  validateParametersToRefreshToken,
 } = require('../utils/validate');
 const {
   insertUser,
@@ -177,10 +175,8 @@ router.post('/login', async (req, res, next) => {
  */
 router.post('/logout', async (req, res, next) => {
   try {
+    validateParametersToRefreshToken(req);
     const { refreshToken } = req.cookies;
-    hasParam(refreshToken,"refreshToken")
-    // パラメータのチェック
-    ValidationParams(req.body, []);
     // usernameを取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // リフレッシュトークンを削除
@@ -224,9 +220,8 @@ router.delete('/delete', admin_route, async (req, res, next) => {
  */
 router.post('/refresh', async (req, res, next) => {
   try {
+    validateParametersToRefreshToken(req);
     const { refreshToken } = req.cookies;
-    hasParam(refreshToken, 'refreshToken');
-    ValidationParams(req.body, []);
     // リフレッシュトークンの検証　＆　usernameの取得
     const username = decodeItem(refreshToken, 'username', REFRESH_SECRET_KEY);
     // usernameからtokenの作成
